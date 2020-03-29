@@ -39,8 +39,8 @@ public class HubMain extends Plugin{
     public void init(){
         // Disable bullet damage
         float distance;
-        int ffax = 2000;
-        int ffay = 2545;
+        int ffax = 150*tilesize;
+        int ffay = 225*tilesize;
 
         for (BulletType b : content.bullets()){
             b.damage = 0;
