@@ -59,7 +59,6 @@ public class HubMain extends Plugin{
                 buffer.position(0);
                 handler2.respond(buffer);
             });
-            // WORK ON THIS!!
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -67,15 +66,13 @@ public class HubMain extends Plugin{
         updatePlayerCount();
 
         // Disable building
+        netServer.admins.addActionFilter((action) -> {
+            return false;
+        });
+
         Events.on(Trigger.update, () -> {
 
             for (Player player : playerGroup.all()) {
-                player.isBuilding = false;
-
-                Core.settings.putSave("playerlimit", 0);
-
-
-
                 if(Math.sqrt(Math.pow(player.x - ffax, 2)+ Math.pow(player.y - ffay, 2)) < 140){
                     Call.onConnect(player.con, "aamindustry.play.ai", 6568);
                 }
