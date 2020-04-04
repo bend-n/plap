@@ -33,7 +33,7 @@ public class HubMain extends Plugin{
 
     private static int customPlayerCount = 0;
 
-    private final static int playerCountTime = 30;
+    private final static int playerCountTime = 60 * 1;
 
     private final static int timerPlayerCount = 0;
     private Interval interval = new Interval(1);
