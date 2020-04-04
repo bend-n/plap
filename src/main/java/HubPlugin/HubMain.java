@@ -1,6 +1,7 @@
 package HubPlugin;
 
 import arc.*;
+import arc.func.Cons;
 import arc.net.Server;
 import arc.util.*;
 import mindustry.*;
@@ -27,9 +28,12 @@ import static mindustry.Vars.*;
 public class HubMain extends Plugin{
 
     private final Rules rules = new Rules();
+
+    private final boolean[] serversUp = {false, false};
+
     private static int customPlayerCount = 0;
 
-    private final static int playerCountTime = 60 * 5;
+    private final static int playerCountTime = 60 * 1;
 
     private final static int timerPlayerCount = 0;
     private Interval interval = new Interval(1);
@@ -41,6 +45,9 @@ public class HubMain extends Plugin{
         float distance;
         int ffax = 150*tilesize;
         int ffay = 225*tilesize;
+
+        int plaguex = 150*tilesize;
+        int plaguey = 62*tilesize;
 
         for (BulletType b : content.bullets()){
             b.damage = 0;
@@ -73,15 +80,22 @@ public class HubMain extends Plugin{
         Events.on(Trigger.update, () -> {
 
             for (Player player : playerGroup.all()) {
-                if(Math.sqrt(Math.pow(player.x - ffax, 2)+ Math.pow(player.y - ffay, 2)) < 140){
+                // ffa
+                if(serversUp[0] && Math.sqrt(Math.pow(player.x - ffax, 2)+ Math.pow(player.y - ffay, 2)) < 140){
                     Call.onConnect(player.con, "aamindustry.play.ai", 6568);
+                }
+                // plague
+                if(serversUp[1] && Math.sqrt(Math.pow(player.x - plaguex, 2)+ Math.pow(player.y - plaguey, 2)) < 100){
+                    Call.onConnect(player.con, "aamindustry.play.ai", 6569);
                 }
 
             }
 
-            // Refresh server player count every 5 seconds
+            // Refresh server player count every 5 seconds and check server status
             if (interval.get(timerPlayerCount, playerCountTime)){
                 updatePlayerCount();
+
+                updateServerStatus();
             }
 
         });
@@ -107,12 +121,17 @@ public class HubMain extends Plugin{
     private void updatePlayerCount(){
         customPlayerCount = playerGroup.size();
         net.pingHost("aamindustry.play.ai", 6568, this::addCount, e -> {});
+        net.pingHost("aamindustry.play.ai", 6569, this::addCount, e -> {});
     }
 
     private void addCount(Host host){
         customPlayerCount += host.players;
     }
 
+    private void updateServerStatus(){
+        net.pingHost("aamindustry.play.ai", 6568, host -> { serversUp[0] = true; }, e -> {});
+        net.pingHost("aamindustry.play.ai", 6569, host -> { serversUp[1] = true; }, e -> {});
+    }
 
     public static ByteBuffer customWriteServerData(){
         String name = (headless ? Administration.Config.name.string() : player.name);
@@ -138,7 +157,7 @@ public class HubMain extends Plugin{
 
     private static void writeString(ByteBuffer buffer, String string, int maxlen){
         byte[] bytes = string.getBytes(charset);
-        //todo truncating this way may lead to wierd encoding errors at the ends of strings...
+        //todo truncating this way may lead to weird encoding errors at the ends of strings...
         if(bytes.length > maxlen){
             bytes = Arrays.copyOfRange(bytes, 0, maxlen);
         }
