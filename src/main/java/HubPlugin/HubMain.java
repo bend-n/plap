@@ -112,6 +112,10 @@ public class HubMain extends Plugin{
             player.sendMessage("[purple]https://discord.gg/GEnYcSv");
         });
 
+        handler.<Player>register("uuid", "Prints your uuid", (args, player) -> {
+            player.sendMessage("[accent]Your uuid is: [scarlet]" + player.uuid);
+        });
+
         handler.<Player>register("votekick", "Disabled", (args, player) -> {
             player.sendMessage("No");
         });
