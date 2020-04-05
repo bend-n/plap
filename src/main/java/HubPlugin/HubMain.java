@@ -104,9 +104,12 @@ public class HubMain extends Plugin{
     @Override
     public void registerClientCommands(CommandHandler handler){
 
-        //register a simple reply command
         handler.<Player>register("ffa", "Connect to the FFA server", (args, player) -> {
             Call.onConnect(player.con, "aamindustry.play.ai", 6568);
+        });
+
+        handler.<Player>register("discord", "Prints the discord link", (args, player) -> {
+            player.sendMessage("[purple]https://discord.gg/GEnYcSv");
         });
 
         handler.<Player>register("votekick", "Disabled", (args, player) -> {
