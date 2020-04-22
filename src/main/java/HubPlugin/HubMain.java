@@ -92,6 +92,22 @@ public class HubMain extends Plugin{
                 updatePlayerCount();
 
                 updateServerStatus();
+
+                net.pingHost("aamindustry.play.ai", 6568, host ->{
+                    Call.onLabel("[gold]" + host.players + "[white] players",
+                            1f, 150*tilesize, 212*tilesize);
+                }, e ->{
+                    Call.onLabel("[gray]Server offline",
+                            1f, 150*tilesize, 212*tilesize);
+                });
+
+                net.pingHost("aamindustry.play.ai", 6569, host ->{
+                    Call.onLabel("[gold]" + host.players + "[white] players",
+                            1f, 150*tilesize, 86*tilesize);
+                }, e ->{
+                    Call.onLabel("[gray]Server offline",
+                            1f, 150*tilesize, 86*tilesize);
+                });
             }
 
         });
@@ -99,18 +115,18 @@ public class HubMain extends Plugin{
         Events.on(PlayerJoin.class, event -> {
             net.pingHost("aamindustry.play.ai", 6568, host ->{
                 Call.onLabel(event.player.con,"[gold]" + host.players + "[white] players",
-                        11110, 150*tilesize, 212*tilesize);
+                        1f, 150*tilesize, 212*tilesize);
             }, e ->{
                 Call.onLabel(event.player.con,"[gray]Server offline",
-                        11110, 150*tilesize, 212*tilesize);
+                        1f, 150*tilesize, 212*tilesize);
             });
 
             net.pingHost("aamindustry.play.ai", 6569, host ->{
                 Call.onLabel(event.player.con,"[gold]" + host.players + "[white] players",
-                        11110, 150*tilesize, 86*tilesize);
+                        1f, 150*tilesize, 86*tilesize);
             }, e ->{
                 Call.onLabel(event.player.con,"[gray]Server offline",
-                        11110, 150*tilesize, 86*tilesize);
+                        1f, 150*tilesize, 86*tilesize);
             });
 
         });
