@@ -1,11 +1,8 @@
 package HubPlugin;
 
 import arc.*;
-import arc.func.Cons;
 import arc.net.Server;
 import arc.util.*;
-import mindustry.*;
-import mindustry.content.*;
 import mindustry.core.Version;
 import mindustry.entities.bullet.BulletType;
 import mindustry.entities.type.*;
@@ -16,12 +13,11 @@ import mindustry.gen.*;
 import mindustry.net.*;
 import mindustry.net.Net;
 import mindustry.plugin.Plugin;
-import mindustry.world.Block;
-import mindustry.world.blocks.defense.turrets.Turret;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static mindustry.Vars.*;
 
@@ -91,7 +87,7 @@ public class HubMain extends Plugin{
 
             }
 
-            // Refresh server player count every 5 seconds and check server status
+            // Refresh server player count every second and check server status
             if (interval.get(timerPlayerCount, playerCountTime)){
                 updatePlayerCount();
 
@@ -99,6 +95,26 @@ public class HubMain extends Plugin{
             }
 
         });
+
+        Events.on(PlayerJoin.class, event -> {
+            net.pingHost("aamindustry.play.ai", 6568, host ->{
+                Call.onLabel(event.player.con,"[gold]" + host.players + "[white] players",
+                        11110, 150*tilesize, 212*tilesize);
+            }, e ->{
+                Call.onLabel(event.player.con,"[gray]Server offline",
+                        11110, 150*tilesize, 212*tilesize);
+            });
+
+            net.pingHost("aamindustry.play.ai", 6569, host ->{
+                Call.onLabel(event.player.con,"[gold]" + host.players + "[white] players",
+                        11110, 150*tilesize, 86*tilesize);
+            }, e ->{
+                Call.onLabel(event.player.con,"[gray]Server offline",
+                        11110, 150*tilesize, 86*tilesize);
+            });
+
+        });
+
     }
 
     @Override
@@ -120,7 +136,7 @@ public class HubMain extends Plugin{
             player.sendMessage("No");
         });
 
-        handler.<Player>register("getpos", "Get x,y", (args, player) -> {
+        handler.<Player>register("getpos", "Get (x,y)", (args, player) -> {
             player.sendMessage("(" + player.x + ", " + player.y + ")");
         });
     }
