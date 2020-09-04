@@ -16,6 +16,7 @@ import mindustry.plugin.Plugin;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,7 +54,7 @@ public class HubMain extends Plugin{
         try { // CREDIT TO QUEZLER FOR SHOWING ME THE RELEVANT CODE TO EDIT
             Field f = net.getClass().getDeclaredField("provider");
             f.setAccessible(true);
-            Net.NetProvider prov = (Net.NetProvider) f.get(net);
+            Net.NetProvider prov = (Net.NetProvider ) f.get(net);
             Field f1 = prov.getClass().getDeclaredField("server");
             f1.setAccessible(true);
             Server ser = (Server) f1.get(prov);
@@ -136,7 +137,7 @@ public class HubMain extends Plugin{
     @Override
     public void registerClientCommands(CommandHandler handler){
 
-        handler.<Player>register("ffa", "Connect to the FFA server", (args, player) -> {
+        handler.<Player>register("assim", "Connect to the Assimilation server", (args, player) -> {
             Call.onConnect(player.con, "aamindustry.play.ai", 6568);
         });
 
@@ -158,6 +159,16 @@ public class HubMain extends Plugin{
     }
 
     private void updatePlayerCount(){
+        if(LocalDate.now().getMonthValue() == 10 && LocalDate.now().getDayOfMonth() == 31){
+            customPlayerCount = 666;
+            return;
+        }
+        if(LocalDate.now().getMonthValue() == 4 && LocalDate.now().getDayOfMonth() == 1){
+            customPlayerCount = 69;
+            return;
+        }
+
+
         customPlayerCount = playerGroup.size();
         net.pingHost("aamindustry.play.ai", 6568, this::addCount, e -> {});
         net.pingHost("aamindustry.play.ai", 6569, this::addCount, e -> {});
@@ -168,8 +179,8 @@ public class HubMain extends Plugin{
     }
 
     private void updateServerStatus(){
-        net.pingHost("aamindustry.play.ai", 6568, host -> { serversUp[0] = true; }, e -> {});
-        net.pingHost("aamindustry.play.ai", 6569, host -> { serversUp[1] = true; }, e -> {});
+        net.pingHost("aamindustry.play.ai", 6568, host -> { serversUp[0] = true; }, e -> {serversUp[0] = false;});
+        net.pingHost("aamindustry.play.ai", 6569, host -> { serversUp[1] = true; }, e -> {serversUp[1] = false;});
     }
 
     public static ByteBuffer customWriteServerData(){
