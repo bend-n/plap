@@ -14,11 +14,15 @@ import mindustry.net.*;
 import mindustry.net.Net;
 import mindustry.plugin.Plugin;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.rmi.Remote;
 
 import static mindustry.Vars.*;
 
@@ -35,9 +39,13 @@ public class HubMain extends Plugin{
     private final static int timerPlayerCount = 0;
     private Interval interval = new Interval(1);
 
+    private PipeHandler pipe = new PipeHandler("/tmp/hubPIPEassim");
+
     // FFA pos: 2000, 2545
     @Override
     public void init(){
+
+
         // Disable bullet damage
         float distance;
         int ffax = 150*tilesize;
@@ -158,6 +166,13 @@ public class HubMain extends Plugin{
         });
     }
 
+    public void registerServerCommands(CommandHandler handler) {
+        handler.register("pipe", "[message]", "Send message to all pipes", args -> {
+            pipe.write(args[0]);
+            Log.info("Message sent.");
+        });
+    }
+
     private void updatePlayerCount(){
         if(LocalDate.now().getMonthValue() == 10 && LocalDate.now().getDayOfMonth() == 31){
             customPlayerCount = 666;
@@ -167,7 +182,6 @@ public class HubMain extends Plugin{
             customPlayerCount = 69;
             return;
         }
-
 
         customPlayerCount = playerGroup.size();
         net.pingHost("aamindustry.play.ai", 6568, this::addCount, e -> {});
@@ -215,4 +229,5 @@ public class HubMain extends Plugin{
         buffer.put((byte)bytes.length);
         buffer.put(bytes);
     }
+
 }
