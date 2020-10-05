@@ -1,3 +1,3 @@
-### Hub plugin
+# Plague plugin by Recessive
 
-This plugin allows a server to act as a hub for a network
+## Do not copy. 

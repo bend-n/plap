@@ -1,7 +1,7 @@
 {
-  "name": "HubPlugin",
+  "name": "PlaguePlugin1",
   "author": "Recessive",
-  "main": "HubPlugin.HubMain",
-  "description": "A hub plugin",
+  "main": "PlaguePlugin1.PlagueMain",
+  "description": "Plague plugin. Don't copy.",
   "version": 0.0
 }
