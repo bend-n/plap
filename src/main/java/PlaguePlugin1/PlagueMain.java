@@ -234,14 +234,6 @@ public class PlagueMain extends Plugin{
                 }
             }
         });
-
-        Events.on(EventType.UnitCreateEvent.class, event ->{
-
-            MinerDrone min = (MinerDrone) event.unit;
-            min.setMineTile(Vars.indexer.findClosestOre(min.x, min.y, Items.copper));
-            min.setState(min.mine);
-
-        });
     }
 
     @Override
@@ -264,12 +256,12 @@ public class PlagueMain extends Plugin{
             if(args.length != 0){
                 currMap = Integer.parseInt(args[0]);
             }
-
+            logic.reset();
             if(currMap == 0){
                 PlagueGenerator generator = new PlagueGenerator();
                 world.loadGenerator(generator);
             }else{
-                mindustry.maps.Map map = maps.customMaps().get(currMap);
+                mindustry.maps.Map map = maps.customMaps().get(currMap-1);
                 world.loadMap(map);
             }
 
@@ -279,8 +271,12 @@ public class PlagueMain extends Plugin{
             Tile tile = state.teams.cores(Team.crux).get(0).tile;
             plagueCore[0] = tile.x;
             plagueCore[1] = tile.y;
+            world.beginMapLoad();
             PlagueGenerator.inverseFloodFill(world.getTiles(), plagueCore[0], plagueCore[1]);
             PlagueGenerator.defaultOres(world.getTiles());
+            world.endMapLoad();
+
+
 
             Log.info("Map " + loadedMap.name() + " loaded");
 

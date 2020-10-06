@@ -2,6 +2,7 @@ package PlaguePlugin1;
 
 import arc.struct.Array;
 import arc.struct.StringMap;
+import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.game.Team;
 import mindustry.maps.Map;
@@ -101,6 +102,7 @@ public class PlagueGenerator extends Generator{
 
         tiles[size/2][size/2].setNet(Blocks.coreFoundation, Team.crux, 0);
         tiles[size/2][size/2+10].setNet(Blocks.powerSource, Team.crux, 0);
+
         world.setMap(new Map(StringMap.of("name", "Patient Zero", "author", "Recessive")));
     }
 
