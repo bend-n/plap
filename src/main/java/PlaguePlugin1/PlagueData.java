@@ -58,7 +58,8 @@ public class PlagueData {
                 Blocks.largeSolarPanel, Blocks.thoriumReactor, Blocks.impactReactor,
                 Blocks.surgeWall, Blocks.surgeWallLarge, Blocks.thoriumWall, Blocks.thoriumWallLarge, Blocks.phaseWall,
                 Blocks.phaseWallLarge, Blocks.titaniumWall, Blocks.titaniumWallLarge, Blocks.copperWallLarge,
-                Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge);
+                Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
+                Blocks.revenantFactory, Blocks.wraithFactory, Blocks.ghoulFactory);
     }
 
 

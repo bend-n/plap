@@ -27,6 +27,8 @@ import mindustry.world.blocks.storage.CoreBlock;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.prefs.Preferences;
@@ -48,7 +50,7 @@ public class PlagueMain extends Plugin{
         put(Team.blue, "[royal]");
     }};
 
-    private final static int corePlaceTime = 60 * 2, damageMultiplyTime = 60 * 60 * 60, secondTime = 60,
+    private final static int corePlaceTime = 60 * 20, damageMultiplyTime = 60 * 60 * 60, secondTime = 60,
             tenMinTime = 60 * 60 * 10;
     private final static int timerCorePlace = 0, timerDamageMultiply = 1, timerSecond = 2, timerTenMin = 3;
     private Interval interval = new Interval(10);
@@ -72,6 +74,7 @@ public class PlagueMain extends Plugin{
     private final DBInterface playerDB = new DBInterface("player_data");
 
     private boolean pregame = true;
+    private boolean survivedToMultiply = false;
 
 
     @Override
@@ -81,6 +84,7 @@ public class PlagueMain extends Plugin{
 
         rules.canGameOver = false;
         rules.playerDamageMultiplier = 0;
+        rules.buildSpeedMultiplier = 2;
 
         netServer.assigner = (player, players) -> {
             if(uuidMapping.containsKey(player.uuid)){
@@ -141,10 +145,22 @@ public class PlagueMain extends Plugin{
         Events.on(EventType.Trigger.class, event ->{
 
             if(interval.get(timerDamageMultiply, damageMultiplyTime)){
+                survivedToMultiply = true;
                 multiplier *= 2;
                 state.rules.unitDamageMultiplier *= 2;
                 state.rules.unitHealthMultiplier *= 2;
                 Call.sendMessage("[accent]Units now deal [scarlet]100%[accent] more damage and have [scarlet]100%[accent] more health");
+                for(Team t : teams.keySet()){
+                    if(t != Team.crux){
+                        for(CustomPlayer cPly : teams.get(t).players){
+                            if(cPly.connected){
+                                cPly.player.sendMessage("[orange]You survived long enough to gain a point!");
+                                playerDB.safePut(cPly.player.uuid, "monthWins", (int) playerDB.safeGet(cPly.player.uuid, "monthWins") + 1);
+                                playerDB.safePut(cPly.player.uuid, "allWins", (int) playerDB.safeGet(cPly.player.uuid, "allWins") + 1);
+                            }
+                        }
+                    }
+                }
             }
             if(counts[0] < 6 && interval.get(timerCorePlace, corePlaceTime)){
                 counts[0] ++;
@@ -152,7 +168,7 @@ public class PlagueMain extends Plugin{
                     pregame = false;
                     for(Player ply : playerGroup.all()){
                         if(ply.getTeam() == Team.blue){
-                            infect(uuidMapping.get(ply.uuid));
+                            infect(uuidMapping.get(ply.uuid), true);
                         }
                     }
                     if(teams.size() == 1){
@@ -199,16 +215,20 @@ public class PlagueMain extends Plugin{
 
 
             if(!uuidMapping.containsKey(event.player.uuid)){
-                uuidMapping.put(event.player.uuid, new CustomPlayer(event.player));
+                uuidMapping.put(event.player.uuid, new CustomPlayer(event.player, (int) playerDB.safeGet(event.player.uuid,"xp") ));
             }
             CustomPlayer cPly = uuidMapping.get(event.player.uuid);
             cPly.player = event.player;
 
-            updateNameColor(event.player);
+            updateName(event.player);
+
+            playerDB.safePut(event.player.uuid,"latestName", event.player.name);
 
             if(event.player.getTeam() == Team.blue) event.player.onRespawn(world.getTiles()[plagueCore[0]][plagueCore[1]]);
 
             cPly.connected = true;
+
+            event.player.sendMessage(leaderboard(5));
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
@@ -247,7 +267,7 @@ public class PlagueMain extends Plugin{
                     teams.get(chosenTeam).addPlayer(uuidMapping.get(player.uuid));
 
                     player.setTeam(chosenTeam);
-                    updateNameColor(player);
+                    updateName(player);
 
                     event.tile.setNet(Blocks.coreFoundation, chosenTeam, 0);
                     state.teams.registerCore((CoreBlock.CoreEntity) event.tile.entity);
@@ -270,15 +290,17 @@ public class PlagueMain extends Plugin{
         });
 
         Events.on(EventType.BlockDestroyEvent.class, event -> {
-            if(event.tile.block() instanceof CoreBlock && event.tile.getTeam().cores().isEmpty()){
+            if(event.tile.block() instanceof CoreBlock && event.tile.getTeam().cores().size == 1){
                 Team deadTeam = event.tile.getTeam();
                 Array<CustomPlayer> winners = new Array<CustomPlayer>();
-                for(CustomPlayer cPly : teams.get(event.tile.getTeam()).players){
+                for(CustomPlayer cPly : teams.get(deadTeam).players){
                     if(teams.size() == 2 && cPly.connected){
                         winners.add(cPly);
                     }
-                    infect(cPly);
+                    infect(cPly, false);
                 }
+
+                killTiles(deadTeam);
 
                 for(CustomPlayer cPly : teams.get(Team.crux).players){
                     if(cPly.connected){
@@ -371,6 +393,26 @@ public class PlagueMain extends Plugin{
             teams.put(Team.crux, new PlagueTeam(Team.crux));
         });
 
+        handler.register("setxp", "<uuid> <xp>", "Set the xp of a player", args -> {
+            int newXp;
+            try{
+                newXp = Integer.parseInt(args[1]);
+            }catch(NumberFormatException e){
+                Log.info("Invalid xp input '" + args[1] + "'");
+                return;
+            }
+
+            if(!playerDB.entries.containsKey(args[0])){
+                playerDB.loadRow(args[0]);
+                playerDB.safePut(args[0],"xp", newXp);
+                playerDB.saveRow(args[0]);
+            }else{
+                playerDB.safePut(args[0],"xp", newXp);
+            }
+            Log.info("Set uuid " + args[0] + " to have xp of " + args[1]);
+
+        });
+
 
     }
 
@@ -382,12 +424,60 @@ public class PlagueMain extends Plugin{
                 return;
             }
             CustomPlayer cPly = uuidMapping.get(player.uuid);
-            infect(cPly);
+            infect(cPly, true);
+        });
+
+        handler.<Player>register("xp", "Show your xp", (args, player) -> {
+            int xp = (int) playerDB.safeGet(player.uuid,"xp");
+            String nextRank = StringHandler.determineRank(xp+5000);
+            player.sendMessage("[scarlet]" + xp + "[accent] xp\nReach [scarlet]" + (xp/5000+1)*5000 + "[accent] xp to reach " + nextRank + "[accent] rank.");
+        });
+
+        handler.<Player>register("stats", "Display stats about the current map", (args, player) -> {
+            int avgTime = (int) mapDB.safeGet(mapID, "avgSurvived");
+            int recordTime = (int) mapDB.safeGet(mapID, "survivorRecord");
+            String s = "[accent]Map stats for: [white]" + world.getMap().name() + "\n" +
+                    "[accent]Plays: [scarlet]" + mapDB.safeGet(mapID, "plays") + "\n" +
+                    "[accent]Average time survived: [scarlet]" + avgTime/60 + "[accent] minutes and [scarlet]" + avgTime % 60 + "[accent] seconds.\n" +
+                    "[accent]Suvivor record: [scarlet]" + recordTime/60 + "[accent] minutes and [scarlet]" + recordTime % 60 + "[accent] seconds.";
+            player.sendMessage(s);
+
+        });
+
+        handler.<Player>register("time", "Display the time now", (args, player) -> {
+            String s = "[accent]Time: [scarlet]" + seconds/60 + "[accent] minutes and [scarlet]"
+                    + seconds % 60 + "[accent] seconds.";
+            player.sendMessage(s);
+        });
+
+        handler.<Player>register("leaderboard", "Display the leaderboard", (args, player) -> {
+            player.sendMessage(leaderboard(5));
+        });
+
+        handler.<Player>register("points", "Display your current points", (args, player) -> {
+            int points = (int) playerDB.safeGet(player.uuid, "monthWins");
+            player.sendMessage("[scarlet]" + points + "[accent] points.");
         });
     }
 
-    void infect(CustomPlayer cPly){
-        if(cPly.player.getTeam() != Team.blue){
+    String leaderboard(int limit){
+        ResultSet rs = playerDB.customQuery("select * from player_data order by monthWins desc limit " + limit);
+        String s = "[accent]Leaderboard:\n";
+        try{
+            int i = 0;
+            while(rs.next()){
+                i ++;
+                s += "\n[gold]" + (i) + "[white]:" + rs.getString("latestName") + "[accent]: [gold]" + rs.getString("monthWins") + "[accent] points";
+            }
+            rs.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return s;
+    }
+
+    void infect(CustomPlayer cPly, boolean remove){
+        if(cPly.player.getTeam() != Team.blue && remove){
             PlagueTeam cTeam = teams.get(cPly.player.getTeam());
             if(cTeam.players.size() <= 1) killTiles(cPly.player.getTeam());
             cTeam.removePlayer(cPly);
@@ -397,11 +487,13 @@ public class PlagueMain extends Plugin{
 
 
         if(cPly.connected){
+
             cPly.player.setTeam(Team.crux);
             cPly.player.kill();
             Rules tempRules = rules.copy();
             tempRules.bannedBlocks = PlagueData.plagueBanned;
             Call.onSetRules(cPly.player.con, tempRules);
+            updateName(cPly.player);
         }
 
     }
@@ -417,8 +509,11 @@ public class PlagueMain extends Plugin{
         }
     }
 
-    private void updateNameColor(Player ply){
-        ply.name = colorMapping.getOrDefault(ply.getTeam(), "[olive]") + ply.name;
+    private void updateName(Player ply){
+        CustomPlayer cPly = uuidMapping.get(ply.uuid);
+        ply.name = StringHandler.determineRank(cPly.startingXP) +
+                colorMapping.getOrDefault(ply.getTeam(), "[olive]") +
+                (ply.donateLevel != 0 ? cPly.rawName : Strings.stripColors(cPly.rawName));
     }
 
     private float cartesianDistance(float x, float y, float cx, float cy){
@@ -442,11 +537,12 @@ public class PlagueMain extends Plugin{
 
     void endgame(Array<CustomPlayer> winners){
 
+        int timeNow = seconds;
         for(CustomPlayer cPly : winners){
             Call.onInfoMessage(cPly.player.con, "[green]Congratulations! You survived the longest\n" +
                     (newRecord ? "    [gold]New record!\n" : "") +
-                    "[accent]Survive time: [scarlet]" + seconds/60 + "[accent] minutes and [scarlet]" +
-                    seconds % 60 + "[accent] seconds.");
+                    "[accent]Survive time: [scarlet]" + timeNow/60 + "[accent] minutes and [scarlet]" +
+                    timeNow % 60 + "[accent] seconds.");
             int addXp = 500 * (cPly.player.donateLevel + 1);
             cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for surviving the longest");
             if(newRecord){
@@ -455,13 +551,12 @@ public class PlagueMain extends Plugin{
             }
 
             playerDB.safePut(cPly.player.uuid,"xp", (int) playerDB.safeGet(cPly.player.uuid,"xp") + addXp);
-            playerDB.safePut(cPly.player.uuid, "monthWins", (int) playerDB.safeGet(cPly.player.uuid, "monthWins") + 1);
-            playerDB.safePut(cPly.player.uuid, "allWins", (int) playerDB.safeGet(cPly.player.uuid, "allWins") + 1);
+
         }
 
         for(CustomPlayer cPly : teams.get(Team.crux).players){
             if(!winners.contains(cPly)){
-                Call.onInfoMessage("[accent]Game over!\nAll survivors have been infected. Loading new map...");
+                Call.onInfoMessage(cPly.player.con, "[accent]Game over!\nAll survivors have been infected. Loading new map...");
             }
         }
 
@@ -473,11 +568,14 @@ public class PlagueMain extends Plugin{
             mapDB.safePut(mapID, "survivorRecord", seconds);
         }
 
+
         Time.runTask(60f * 10f, () -> {
 
             for(Player player : playerGroup.all()) {
                 Call.onConnect(player.con, "aamindustry.play.ai", 6567);
             }
+            mapDB.saveRow(mapID);
+
 
             // in case any was missed (give a delay so players all leave)
             Time.runTask(60f * 1, () -> {

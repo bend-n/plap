@@ -8,7 +8,7 @@ import java.util.List;
 
 public class PlagueTeam {
     protected Team team;
-    protected List<CustomPlayer> players = new ArrayList<>();
+    protected ArrayList<CustomPlayer> players = new ArrayList<>();
 
 
     public PlagueTeam(Team team) {
