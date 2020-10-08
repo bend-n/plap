@@ -24,6 +24,7 @@ import mindustry.type.ItemStack;
 import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
+import mindustry.world.blocks.storage.Vault;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -50,7 +51,7 @@ public class PlagueMain extends Plugin{
         put(Team.blue, "[royal]");
     }};
 
-    private final static int corePlaceTime = 60 * 20, damageMultiplyTime = 60 * 60 * 60, secondTime = 60,
+    private final static int corePlaceTime = 60 * 20, damageMultiplyTime = 60 * 60 * 30, secondTime = 60,
             tenMinTime = 60 * 60 * 10;
     private final static int timerCorePlace = 0, timerDamageMultiply = 1, timerSecond = 2, timerTenMin = 3;
     private Interval interval = new Interval(10);
@@ -117,6 +118,12 @@ public class PlagueMain extends Plugin{
                         && action.player.getTeam() == Team.crux){
                     return false;
                 }
+                if(action.block != null && action.block == Blocks.commandCenter
+                        && action.player.playTime < 1000){
+                    action.player.sendMessage("[accent]You must have [scarlet]1000 [accent]minutes of playtime " +
+                            "to use a Command center!");
+                    return false;
+                }
 
 
 
@@ -146,10 +153,10 @@ public class PlagueMain extends Plugin{
 
             if(interval.get(timerDamageMultiply, damageMultiplyTime)){
                 survivedToMultiply = true;
-                multiplier *= 2;
-                state.rules.unitDamageMultiplier *= 2;
-                state.rules.unitHealthMultiplier *= 2;
-                Call.sendMessage("[accent]Units now deal [scarlet]100%[accent] more damage and have [scarlet]100%[accent] more health");
+                multiplier *= 1.5;
+                state.rules.unitDamageMultiplier *= 1.5;
+                state.rules.unitHealthMultiplier *= 1.5;
+                Call.sendMessage("[accent]Units now deal [scarlet]50%[accent] more damage and have [scarlet]50%[accent] more health");
                 for(Team t : teams.keySet()){
                     if(t != Team.crux){
                         for(CustomPlayer cPly : teams.get(t).players){
@@ -220,9 +227,11 @@ public class PlagueMain extends Plugin{
             CustomPlayer cPly = uuidMapping.get(event.player.uuid);
             cPly.player = event.player;
 
+            playerDB.safePut(event.player.uuid,"latestName", event.player.name);
+
             updateName(event.player);
 
-            playerDB.safePut(event.player.uuid,"latestName", event.player.name);
+
 
             if(event.player.getTeam() == Team.blue) event.player.onRespawn(world.getTiles()[plagueCore[0]][plagueCore[1]]);
 
@@ -322,6 +331,20 @@ public class PlagueMain extends Plugin{
                 event.unit.onRespawn(world.getTiles()[plagueCore[0]][plagueCore[1]]);
             }
         });
+
+        Events.on(EventType.WithdrawEvent.class, event ->{
+            if(event.tile.block() == Blocks.vault && event.tile.getTeam() != Team.crux){
+                boolean makeCore[] = {false};
+                event.tile.entity.items.forEach((Item, amount) -> {
+                    if(Item == Items.thorium && amount >= 997f){ // A small buffer to account for slight desyncs
+                        makeCore[0] = true;
+                    }
+                });
+                if(makeCore[0]){
+                    event.tile.setNet(Blocks.coreShard, event.tile.getTeam(), 0);
+                }
+            }
+        });
     }
 
     @Override
@@ -374,6 +397,8 @@ public class PlagueMain extends Plugin{
 
             state.rules = rules.copy();
             logic.play();
+
+            checkExpiration();
 
             netServer.openServer();
 
@@ -591,6 +616,41 @@ public class PlagueMain extends Plugin{
             Time.runTask(60f*2, () -> System.exit(2));
         });
 
+    }
+
+    // Long term stuff
+
+    void checkExpiration(){
+        prefs = Preferences.userRoot().node(this.getClass().getName());
+
+
+        int prevMonth = prefs.getInt("month", 1);
+        int currMonth = Calendar.getInstance().get(Calendar.MONTH);
+
+        if(prevMonth != currMonth){
+            rankReset();
+            winsReset();
+            Log.info("New month, ranks and monthly wins are reset automatically...");
+        }
+        prefs.putInt("month", currMonth);
+    }
+
+
+    void rankReset(){
+        // Reset ranks
+        playerDB.setColumn("xp", 0);
+
+        for(Object uuid: playerDB.entries.keySet().toArray()){
+            playerDB.safePut((String) uuid,"xp", 0);
+        }
+    }
+
+    void winsReset(){
+        playerDB.setColumn("monthWins", 0);
+
+        for(Object uuid: playerDB.entries.keySet().toArray()){
+            playerDB.safePut((String) uuid,"monthWins", 0);
+        }
     }
 
 }

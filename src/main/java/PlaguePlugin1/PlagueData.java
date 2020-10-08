@@ -59,7 +59,7 @@ public class PlagueData {
                 Blocks.surgeWall, Blocks.surgeWallLarge, Blocks.thoriumWall, Blocks.thoriumWallLarge, Blocks.phaseWall,
                 Blocks.phaseWallLarge, Blocks.titaniumWall, Blocks.titaniumWallLarge, Blocks.copperWallLarge,
                 Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
-                Blocks.revenantFactory, Blocks.wraithFactory, Blocks.ghoulFactory);
+                /*Blocks.revenantFactory, Blocks.wraithFactory, Blocks.ghoulFactory, */Blocks.crawlerFactory);
     }
 
 
