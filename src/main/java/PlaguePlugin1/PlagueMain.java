@@ -56,6 +56,7 @@ public class PlagueMain extends Plugin{
     private final static int timerCorePlace = 0, timerDamageMultiply = 1, timerSecond = 2, timerTenMin = 3;
     private Interval interval = new Interval(10);
 
+    private float realTime = 0f;
     private int seconds = 0;
     private int record;
     private boolean newRecord = false;
@@ -75,7 +76,7 @@ public class PlagueMain extends Plugin{
     private final DBInterface playerDB = new DBInterface("player_data");
 
     private boolean pregame = true;
-    private boolean survivedToMultiply = false;
+    private boolean survivedToPoint = false;
 
 
     @Override
@@ -152,11 +153,7 @@ public class PlagueMain extends Plugin{
         Events.on(EventType.Trigger.class, event ->{
 
             if(interval.get(timerDamageMultiply, damageMultiplyTime)){
-                survivedToMultiply = true;
-                multiplier *= 1.5;
-                state.rules.unitDamageMultiplier *= 1.5;
-                state.rules.unitHealthMultiplier *= 1.5;
-                Call.sendMessage("[accent]Units now deal [scarlet]50%[accent] more damage and have [scarlet]50%[accent] more health");
+                survivedToPoint = true;
                 for(Team t : teams.keySet()){
                     if(t != Team.crux){
                         for(CustomPlayer cPly : teams.get(t).players){
@@ -188,15 +185,20 @@ public class PlagueMain extends Plugin{
                 }
             }
 
-            if(interval.get(timerSecond, secondTime)){
-                seconds ++;
-                if(seconds > record && !newRecord){
-                    Call.sendMessage("[gold]New survivor record!");
-                    newRecord = true;
-                }
+            realTime += Time.delta();
+            seconds = (int) (realTime / 60);
+
+            if(seconds > record && !newRecord){
+                Call.sendMessage("[gold]New survivor record!");
+                newRecord = true;
             }
 
+
             if(interval.get(timerTenMin, tenMinTime)){
+                multiplier *= 1.15;
+                state.rules.unitDamageMultiplier *= 1.15;
+                state.rules.unitHealthMultiplier *= 1.15;
+                Call.sendMessage("[accent]Units now deal [scarlet]15%[accent] more damage and have [scarlet]15%[accent] more health");
                 for(Team t : teams.keySet()){
                     if(t != Team.crux){
                         for(CustomPlayer cPly : teams.get(t).players){
@@ -209,6 +211,7 @@ public class PlagueMain extends Plugin{
                     }
                 }
             }
+
         });
 
 
@@ -233,7 +236,10 @@ public class PlagueMain extends Plugin{
 
 
 
-            if(event.player.getTeam() == Team.blue) event.player.onRespawn(world.getTiles()[plagueCore[0]][plagueCore[1]]);
+            if(event.player.getTeam() == Team.blue){
+                event.player.onRespawn(world.getTiles()[plagueCore[0]][plagueCore[1]]);
+                Call.onPositionSet(event.player.con, plagueCore[0], plagueCore[1]);
+            }
 
             cPly.connected = true;
 
@@ -329,6 +335,7 @@ public class PlagueMain extends Plugin{
         Events.on(EventType.UnitDestroyEvent.class, event ->{
             if(event.unit instanceof Player && event.unit.getTeam() == Team.blue){
                 event.unit.onRespawn(world.getTiles()[plagueCore[0]][plagueCore[1]]);
+                Call.onPositionSet(((Player) event.unit).con, plagueCore[0], plagueCore[1]);
             }
         });
 
@@ -436,6 +443,12 @@ public class PlagueMain extends Plugin{
             }
             Log.info("Set uuid " + args[0] + " to have xp of " + args[1]);
 
+        });
+
+        handler.register("manual_reset", "Perform a manual reset of xp and points", args -> {
+            rankReset();
+            winsReset();
+            Log.info("xp and points have been reset");
         });
 
 
