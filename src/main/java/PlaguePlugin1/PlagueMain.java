@@ -195,10 +195,10 @@ public class PlagueMain extends Plugin{
 
 
             if(interval.get(timerTenMin, tenMinTime)){
-                multiplier *= 1.15;
-                state.rules.unitDamageMultiplier *= 1.15;
-                state.rules.unitHealthMultiplier *= 1.15;
-                Call.sendMessage("[accent]Units now deal [scarlet]15%[accent] more damage and have [scarlet]15%[accent] more health");
+                multiplier *= 1.05;
+                state.rules.unitDamageMultiplier *= 1.05;
+                state.rules.unitHealthMultiplier *= 1.05;
+                Call.sendMessage("[accent]Units now deal [scarlet]5%[accent] more damage and have [scarlet]5%[accent] more health");
                 for(Team t : teams.keySet()){
                     if(t != Team.crux){
                         for(CustomPlayer cPly : teams.get(t).players){
@@ -230,9 +230,11 @@ public class PlagueMain extends Plugin{
             CustomPlayer cPly = uuidMapping.get(event.player.uuid);
             cPly.player = event.player;
 
-            playerDB.safePut(event.player.uuid,"latestName", event.player.name);
+            playerDB.safePut(event.player.uuid,"latestName", StringHandler.determineRank(cPly.startingXP) + event.player.name);
 
             updateName(event.player);
+
+
 
 
 
@@ -294,10 +296,6 @@ public class PlagueMain extends Plugin{
 
                     player.setDead(true);
                     player.onRespawn(state.teams.cores(chosenTeam).get(0).tile);
-
-                    Rules tempRules = rules.copy();
-                    tempRules.bannedBlocks = PlagueData.survivorBanned;
-                    Call.onSetRules(player.con, tempRules);
 
 
                 }
@@ -417,10 +415,10 @@ public class PlagueMain extends Plugin{
             mapDB.loadRow(mapID);
             record = (int) mapDB.safeGet(mapID, "survivorRecord");
 
-
-            for(ItemStack stack : PlagueData.plagueLoadout){
+            tile.entity.items.clear();
+            /*for(ItemStack stack : PlagueData.plagueLoadout){
                 Call.transferItemTo(stack.item, stack.amount, tile.drawx(), tile.drawy(), tile);
-            }
+            }*/
 
             teams.put(Team.crux, new PlagueTeam(Team.crux));
         });
@@ -528,9 +526,6 @@ public class PlagueMain extends Plugin{
 
             cPly.player.setTeam(Team.crux);
             cPly.player.kill();
-            Rules tempRules = rules.copy();
-            tempRules.bannedBlocks = PlagueData.plagueBanned;
-            Call.onSetRules(cPly.player.con, tempRules);
             updateName(cPly.player);
         }
 
@@ -548,6 +543,18 @@ public class PlagueMain extends Plugin{
     }
 
     private void updateName(Player ply){
+
+        if(ply.getTeam() == Team.crux){
+            Rules tempRules = rules.copy();
+            tempRules.bannedBlocks = PlagueData.plagueBanned;
+            Call.onSetRules(ply.con, tempRules);
+        }else if (ply.getTeam() != Team.blue){
+            Rules tempRules = rules.copy();
+            tempRules.bannedBlocks = PlagueData.survivorBanned;
+            Call.onSetRules(ply.con, tempRules);
+        }
+
+
         CustomPlayer cPly = uuidMapping.get(ply.uuid);
         ply.name = StringHandler.determineRank(cPly.startingXP) +
                 colorMapping.getOrDefault(ply.getTeam(), "[olive]") +
@@ -598,10 +605,13 @@ public class PlagueMain extends Plugin{
             }
         }
 
-        int plays = (int) mapDB.safeGet(mapID, "plays") + 1;
-        int rolling = ((int) mapDB.safeGet(mapID, "avgSurvived") + seconds)/plays;
-        mapDB.safePut(mapID, "avgSurvived", rolling);
-        mapDB.safePut(mapID, "plays", plays);
+        if(timeNow > 60 * 5){
+            int plays = (int) mapDB.safeGet(mapID, "plays") + 1;
+            int rolling = ((int) mapDB.safeGet(mapID, "avgSurvived") + seconds)/plays;
+            mapDB.safePut(mapID, "avgSurvived", rolling);
+            mapDB.safePut(mapID, "plays", plays);
+        }
+
         if(newRecord){
             mapDB.safePut(mapID, "survivorRecord", seconds);
         }
