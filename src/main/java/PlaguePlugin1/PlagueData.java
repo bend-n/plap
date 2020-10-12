@@ -4,8 +4,12 @@ import arc.struct.Array;
 import arc.struct.ObjectSet;
 import mindustry.Vars;
 import mindustry.content.Blocks;
+import mindustry.content.Bullets;
+import mindustry.content.Fx;
 import mindustry.content.Items;
+import mindustry.gen.Sounds;
 import mindustry.type.ItemStack;
+import mindustry.type.Weapon;
 import mindustry.world.Block;
 
 import java.util.Collections;
@@ -45,7 +49,7 @@ public class PlagueData {
     public static final ObjectSet<Block> survivorBanned;
     static {
         survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.wraithFactory, Blocks.ghoulFactory, Blocks.revenantFactory, Blocks.daggerFactory,
-                Blocks.crawlerFactory, Blocks.titanFactory, Blocks.fortressFactory);
+                Blocks.crawlerFactory, Blocks.titanFactory, Blocks.fortressFactory, Blocks.phaseWall, Blocks.phaseWallLarge);
     }
 
     public static final ObjectSet<Block> plagueBanned;
@@ -61,6 +65,40 @@ public class PlagueData {
                 Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
                 /*Blocks.revenantFactory, Blocks.wraithFactory, Blocks.ghoulFactory, */Blocks.crawlerFactory);
     }
+
+    public static final Weapon daggerWepaon = new Weapon("dagger-weapon") {
+        {
+            this.length = 1.5F;
+            this.reload = 7.0F;
+            this.alternate = true;
+            this.ejectEffect = Fx.shellEjectSmall;
+            this.bullet = Bullets.standardCopper;
+        }};
+
+    public static final Weapon titanWepaon = new Weapon("titan-weapon") {
+        {
+            this.shootSound = Sounds.flame;
+            this.length = 1.0F;
+            this.reload = 3.5F;
+            this.alternate = true;
+            this.recoil = 1.0F;
+            this.ejectEffect = Fx.none;
+            this.bullet = Bullets.basicFlame;
+        }};
+
+    public static final Weapon fortressWepaon = new Weapon("fortress-weapon") {
+        {
+            this.length = 1.0F;
+            this.reload = 20.0F;
+            this.width = 10.0F;
+            this.alternate = true;
+            this.recoil = 4.0F;
+            this.shake = 2.0F;
+            this.ejectEffect = Fx.shellEjectMedium;
+            this.bullet = Bullets.artilleryUnit;
+            this.shootSound = Sounds.artillery;
+        }};
+
 
 
 

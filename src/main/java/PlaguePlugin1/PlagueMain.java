@@ -1,13 +1,13 @@
 package PlaguePlugin1;
 
 import arc.*;
+import arc.func.Boolf;
 import arc.math.Mathf;
 import arc.net.Server;
 import arc.struct.Array;
 import arc.util.*;
 import mindustry.Vars;
-import mindustry.content.Blocks;
-import mindustry.content.Items;
+import mindustry.content.*;
 import mindustry.core.GameState;
 import mindustry.core.Version;
 import mindustry.entities.bullet.BulletType;
@@ -21,10 +21,14 @@ import mindustry.net.*;
 import mindustry.net.Net;
 import mindustry.plugin.Plugin;
 import mindustry.type.ItemStack;
+import mindustry.type.Weapon;
+import mindustry.world.Block;
 import mindustry.world.Build;
 import mindustry.world.Tile;
+import mindustry.world.blocks.defense.turrets.ChargeTurret;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.storage.Vault;
+import mindustry.world.blocks.units.UnitFactory;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -84,9 +88,7 @@ public class PlagueMain extends Plugin{
         mapDB.connect("data/server_data.db");
         playerDB.connect(mapDB.conn);
 
-        rules.canGameOver = false;
-        rules.playerDamageMultiplier = 0;
-        rules.buildSpeedMultiplier = 2;
+        initRules();
 
         netServer.assigner = (player, players) -> {
             if(uuidMapping.containsKey(player.uuid)){
@@ -494,6 +496,42 @@ public class PlagueMain extends Plugin{
             int points = (int) playerDB.safeGet(player.uuid, "monthWins");
             player.sendMessage("[scarlet]" + points + "[accent] points.");
         });
+
+        handler.<Player>register("info", "Display info about the current game", (args, player) -> {
+            player.sendMessage("[#4d004d]{[purple]AA[#4d004d]} [olive]Plague[accent] is a survival game mode with two teams," +
+                    " the [scarlet]Plague [accent]and [green]Survivors[accent].\n\n" +
+                    "The [scarlet]Plague[accent] build up their economy and make the biggest army possible, and try to" +
+                    " break through the [green]Survivors[accent] defenses.\n\n" +
+                    "The [green]Survivors[accent] build up a huge defense and last as long as possible. To become a " +
+                    "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
+                    " allowed to choose your team. Place any block to place a core at the start of the game.");
+        });
+    }
+
+    void initRules(){
+
+        rules.canGameOver = false;
+        rules.playerDamageMultiplier = 0;
+        rules.buildSpeedMultiplier = 2;
+
+        Block dagger = Vars.content.blocks().find(block -> block.name.equals("dagger-factory"));
+        ((UnitFactory)(dagger)).maxSpawn = 1;
+
+        UnitTypes.dagger.health *= 4;
+        UnitTypes.dagger.weapon = PlagueData.daggerWepaon;
+
+        Block titan = Vars.content.blocks().find(block -> block.name.equals("titan-factory"));
+        ((UnitFactory)(titan)).maxSpawn = 1;
+
+        UnitTypes.titan.health *= 4;
+        UnitTypes.titan.weapon = PlagueData.titanWepaon;
+
+        Block fortress = Vars.content.blocks().find(block -> block.name.equals("fortress-factory"));
+        ((UnitFactory)(fortress)).maxSpawn = 1;
+
+        UnitTypes.fortress.health *= 3;
+        UnitTypes.fortress.weapon = PlagueData.fortressWepaon;
+
     }
 
     String leaderboard(int limit){
