@@ -25,6 +25,7 @@ import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.Tiles;
 import mindustry.world.blocks.storage.CoreBlock;
+import mindustry.world.blocks.units.Reconstructor;
 import mindustry.world.blocks.units.UnitFactory;
 
 import java.lang.reflect.Field;
@@ -101,10 +102,6 @@ public class PlagueMain extends Plugin {
         };
 
         netServer.admins.addActionFilter((action) -> {
-            if(action.player != null && action.block != null && action.block == Blocks.airFactory
-                && (int) action.config == 0){
-                return false;
-            }
 
             if(action.player != null && action.tile != null){
                 if(cartesianDistance(action.tile.x, action.tile.y,
@@ -309,6 +306,22 @@ public class PlagueMain extends Plugin {
             }
         });
 
+        Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            if(event.unit.getPlayer() == null){
+                return;
+            }
+            try {
+                if(event.team == Team.crux && cartesianDistance(event.tile.x, event.tile.y,
+                        plagueCore[0], plagueCore[1]) < world.height()/4){
+                    event.tile.build.indestructible = true;
+                }
+            }catch(NullPointerException e){
+                e.printStackTrace();
+            }
+
+        });
+
+
         Events.on(EventType.BlockDestroyEvent.class, event -> {
             if(event.tile.block() instanceof CoreBlock && event.tile.team().cores().size == 1){
                 Team deadTeam = event.tile.team();
@@ -510,7 +523,8 @@ public class PlagueMain extends Plugin {
                     " break through the [green]Survivors[accent] defenses.\n\n" +
                     "The [green]Survivors[accent] build up a huge defense and last as long as possible. To become a " +
                     "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
-                    " allowed to choose your team. Place any block to place a core at the start of the game.");
+                    " allowed to choose your team. Place any block to place a core at the start of the game.\n\n" +
+                    "Air factories are only able to make monos, and all air units do no damage.");
         });
     }
 
@@ -523,9 +537,17 @@ public class PlagueMain extends Plugin {
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
+        UnitTypes.poly.weapons = new Seq<>();
+        UnitTypes.mega.weapons = new Seq<>();
+        UnitTypes.quad.weapons = new Seq<>();
+        UnitTypes.oct.weapons = new Seq<>();
 
         rules.fire = false;
         rules.modeName = "Plague";
+
+        ((UnitFactory) Blocks.airFactory).plans.get(0).unit = UnitTypes.mono;
+
+        /*((UnitFactory) Blocks.airFactory).capacities = new int[]{1, 50};*/
 
         /*Block dagger = Vars.content.blocks().find(block -> block.name.equals("dagger-factory"));
         ((UnitFactory)(dagger)).maxSpawn = 1;
