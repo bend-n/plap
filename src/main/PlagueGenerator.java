@@ -2,6 +2,7 @@ package main;
 
 import arc.struct.Seq;
 import arc.struct.StringMap;
+import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.game.Team;
 import mindustry.maps.Map;
@@ -24,7 +25,7 @@ import static mindustry.Vars.maps;
 import static mindustry.Vars.world;
 
 
-public class PlagueGenerator extends BaseGenerator{
+public class PlagueGenerator{
 
     // elevation --->
     // temperature
@@ -40,8 +41,7 @@ public class PlagueGenerator extends BaseGenerator{
 
     // Fix this generation later
 
-    @Override
-    public void generate(Tiles tiles, Seq<Tile> cores, Tile spawn, Team team, Sector sector, float difficulty) {
+    public void generate(Tiles tiles) {
 
         GenerateInput in = new GenerateInput();
 
@@ -99,7 +99,7 @@ public class PlagueGenerator extends BaseGenerator{
         tiles.get(size/2,size/2).setNet(Blocks.coreFoundation, Team.crux, 0);
         tiles.get(size/2,size/2+10).setNet(Blocks.powerSource, Team.crux, 0);
 
-        world.loadMap(new Map(StringMap.of("name", "Patient Zero", "author", "Recessive")));
+        Vars.state.map = new Map(StringMap.of("name", "Patient Zero", "author", "Recessive"));
     }
 
     public static void defaultOres(Tiles tiles){
@@ -177,6 +177,7 @@ public class PlagueGenerator extends BaseGenerator{
             }
         }
     }
+
 }
 
 class tendrilFilter extends GenerateFilter{

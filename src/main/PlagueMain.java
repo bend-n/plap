@@ -101,6 +101,11 @@ public class PlagueMain extends Plugin {
         };
 
         netServer.admins.addActionFilter((action) -> {
+            if(action.player != null && action.block != null && action.block == Blocks.airFactory
+                && (int) action.config == 0){
+                return false;
+            }
+
             if(action.player != null && action.tile != null){
                 if(cartesianDistance(action.tile.x, action.tile.y,
                         plagueCore[0], plagueCore[1]) < world.height()/4){
@@ -337,6 +342,10 @@ public class PlagueMain extends Plugin {
                 event.unit.onRespawn(world.getTiles()[plagueCore[0]][plagueCore[1]]);
                 Call.onPositionSet(((Player) event.unit).con, plagueCore[0], plagueCore[1]);
             }*/
+            if(event.unit.getPlayer() != null && event.unit.team() == Team.blue){
+                CoreBlock.playerSpawn(world.tile(plagueCore[0], plagueCore[1]), event.unit.getPlayer());
+            }
+
         });
 
         Events.on(EventType.TapEvent.class, event ->{
@@ -372,7 +381,7 @@ public class PlagueMain extends Plugin {
             Blocks.powerSource.health = Integer.MAX_VALUE;
             if(currMap == 0){
                 PlagueGenerator generator = new PlagueGenerator();
-                world.loadGenerator(601, 601, (Cons<Tiles>) generator);
+                world.loadGenerator(601, 601, generator::generate);
             }else{
                 mindustry.maps.Map map = maps.customMaps().get(currMap-1);
                 world.loadMap(map);
@@ -510,6 +519,13 @@ public class PlagueMain extends Plugin {
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
         rules.buildSpeedMultiplier = 2;
+
+        UnitTypes.alpha.weapons = new Seq<>();
+        UnitTypes.beta.weapons = new Seq<>();
+        UnitTypes.gamma.weapons = new Seq<>();
+
+        rules.fire = false;
+        rules.modeName = "Plague";
 
         /*Block dagger = Vars.content.blocks().find(block -> block.name.equals("dagger-factory"));
         ((UnitFactory)(dagger)).maxSpawn = 1;

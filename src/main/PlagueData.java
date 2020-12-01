@@ -39,7 +39,7 @@ public class PlagueData {
     public static final Seq<ItemStack> survivorLoadout;
     static {
         survivorLoadout = ItemStack.list(Items.copper, 4000, Items.lead, 4000,
-                Items.graphite, 2000, Items.titanium, 2000, Items.silicon, 1000, Items.metaglass, 1000, Items.thorium, 10000);
+                Items.graphite, 2000, Items.titanium, 2000, Items.silicon, 1000, Items.metaglass, 1000);
     }
 
     public static final Seq<ItemStack> plagueLoadout;
@@ -52,7 +52,8 @@ public class PlagueData {
     static {
         survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.groundFactory, Blocks.navalFactory,
                 Blocks.additiveReconstructor, Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor,
-                Blocks.tetrativeReconstructor, Blocks.phaseWall, Blocks.phaseWallLarge);
+                Blocks.tetrativeReconstructor, Blocks.phaseWall, Blocks.phaseWallLarge,
+                Blocks.airFactory, Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
 
     public static final ObjectSet<Block> plagueBanned;
@@ -66,7 +67,8 @@ public class PlagueData {
                 Blocks.largeSolarPanel, Blocks.thoriumReactor, Blocks.impactReactor,
                 Blocks.surgeWall, Blocks.surgeWallLarge, Blocks.thoriumWall, Blocks.thoriumWallLarge, Blocks.phaseWall,
                 Blocks.phaseWallLarge, Blocks.titaniumWall, Blocks.titaniumWallLarge, Blocks.copperWallLarge,
-                Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge);
+                Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
+                Blocks.airFactory, Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
 
     public static final Weapon daggerWepaon = new Weapon("dagger-weapon") {
