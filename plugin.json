@@ -1,7 +1,7 @@
 {
   "name": "PlaguePlugin1",
   "author": "Recessive",
-  "main": "PlaguePlugin1.PlagueMain",
+  "main": "main.PlagueMain",
   "description": "Plague plugin. Don't copy.",
-  "version": 0.0
+  "version": 0.1
 }

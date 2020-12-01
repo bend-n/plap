@@ -1,7 +1,8 @@
-package PlaguePlugin1;
+package main;
 
-import arc.struct.Array;
+import arc.math.Mathf;
 import arc.struct.ObjectSet;
+import arc.struct.Seq;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Bullets;
@@ -15,6 +16,7 @@ import mindustry.world.Block;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class PlagueData {
 
@@ -34,13 +36,13 @@ public class PlagueData {
         itemValues = Collections.unmodifiableMap(aMap);
     }
 
-    public static final Array<ItemStack> survivorLoadout;
+    public static final Seq<ItemStack> survivorLoadout;
     static {
         survivorLoadout = ItemStack.list(Items.copper, 4000, Items.lead, 4000,
-                Items.graphite, 2000, Items.titanium, 2000, Items.silicon, 1000, Items.metaglass, 1000);
+                Items.graphite, 2000, Items.titanium, 2000, Items.silicon, 1000, Items.metaglass, 1000, Items.thorium, 10000);
     }
 
-    public static final Array<ItemStack> plagueLoadout;
+    public static final Seq<ItemStack> plagueLoadout;
     static {
         plagueLoadout = ItemStack.list(Items.copper, 4000, Items.lead, 4000,
                 Items.graphite, 2000, Items.titanium, 2000, Items.silicon, 1000, Items.metaglass, 1000);
@@ -48,38 +50,36 @@ public class PlagueData {
 
     public static final ObjectSet<Block> survivorBanned;
     static {
-        survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.wraithFactory, Blocks.ghoulFactory, Blocks.revenantFactory, Blocks.daggerFactory,
-                Blocks.crawlerFactory, Blocks.titanFactory, Blocks.fortressFactory, Blocks.phaseWall, Blocks.phaseWallLarge);
+        survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.groundFactory, Blocks.navalFactory,
+                Blocks.additiveReconstructor, Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor,
+                Blocks.tetrativeReconstructor, Blocks.phaseWall, Blocks.phaseWallLarge);
     }
 
     public static final ObjectSet<Block> plagueBanned;
     static {
         plagueBanned = ObjectSet.with(Blocks.duo, Blocks.scatter, Blocks.scorch, Blocks.lancer, Blocks.arc,
                 Blocks.swarmer, Blocks.salvo, Blocks.fuse, Blocks.cyclone, Blocks.spectre, Blocks.meltdown,
-                Blocks.hail, Blocks.ripple, Blocks.shockMine,
+                Blocks.hail, Blocks.ripple, Blocks.shockMine, Blocks.parallax, Blocks.segment, Blocks.tsunami,
+                Blocks.foreshadow,
                 Blocks.battery, Blocks.batteryLarge, Blocks.combustionGenerator, Blocks.thermalGenerator,
-                Blocks.turbineGenerator, Blocks.differentialGenerator, Blocks.rtgGenerator, Blocks.solarPanel,
+                Blocks.steamGenerator, Blocks.differentialGenerator, Blocks.rtgGenerator, Blocks.solarPanel,
                 Blocks.largeSolarPanel, Blocks.thoriumReactor, Blocks.impactReactor,
                 Blocks.surgeWall, Blocks.surgeWallLarge, Blocks.thoriumWall, Blocks.thoriumWallLarge, Blocks.phaseWall,
                 Blocks.phaseWallLarge, Blocks.titaniumWall, Blocks.titaniumWallLarge, Blocks.copperWallLarge,
-                Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
-                /*Blocks.revenantFactory, Blocks.wraithFactory, Blocks.ghoulFactory, */Blocks.crawlerFactory);
+                Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge);
     }
 
     public static final Weapon daggerWepaon = new Weapon("dagger-weapon") {
         {
-            this.length = 1.5F;
-            this.reload = 7.0F;
+            this.reload = 14.0F;
             this.alternate = true;
-            this.ejectEffect = Fx.shellEjectSmall;
             this.bullet = Bullets.standardCopper;
         }};
 
     public static final Weapon titanWepaon = new Weapon("titan-weapon") {
         {
             this.shootSound = Sounds.flame;
-            this.length = 1.0F;
-            this.reload = 3.5F;
+            this.reload = 7F;
             this.alternate = true;
             this.recoil = 1.0F;
             this.ejectEffect = Fx.none;
@@ -88,19 +88,25 @@ public class PlagueData {
 
     public static final Weapon fortressWepaon = new Weapon("fortress-weapon") {
         {
-            this.length = 1.0F;
-            this.reload = 20.0F;
-            this.width = 10.0F;
+            this.reload = 40.0F;
             this.alternate = true;
             this.recoil = 4.0F;
             this.shake = 2.0F;
-            this.ejectEffect = Fx.shellEjectMedium;
-            this.bullet = Bullets.artilleryUnit;
+            this.bullet = Bullets.artilleryDense;
             this.shootSound = Sounds.artillery;
         }};
 
 
-
+    public static int getRandomWithExclusion(int start, int end, int... exclude) {
+        int random = start + Mathf.random(end - start - exclude.length);
+        for (int ex : exclude) {
+            if (random < ex) {
+                break;
+            }
+            random++;
+        }
+        return random;
+    }
 
 
 }

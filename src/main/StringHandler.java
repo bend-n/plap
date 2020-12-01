@@ -1,4 +1,4 @@
-package PlaguePlugin1;
+package main;
 
 public class StringHandler {
     public static String determineRank(int xp){

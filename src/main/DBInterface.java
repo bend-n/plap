@@ -1,4 +1,4 @@
-package PlaguePlugin1;
+package main;
 
 import arc.util.Time;
 

@@ -1,6 +1,7 @@
-package PlaguePlugin1;
+package main;
 
-import mindustry.entities.type.Player;
+
+import mindustry.gen.Player;
 
 public class CustomPlayer {
 

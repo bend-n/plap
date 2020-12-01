@@ -1,19 +1,21 @@
-package PlaguePlugin1;
+package main;
 
-import arc.struct.Array;
+import arc.struct.Seq;
 import arc.struct.StringMap;
-import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.game.Team;
 import mindustry.maps.Map;
+import mindustry.maps.filters.FilterOption;
 import mindustry.maps.filters.GenerateFilter;
 import mindustry.maps.filters.GenerateFilter.GenerateInput;
 import mindustry.maps.filters.OreFilter;
-import mindustry.maps.generators.Generator;
+import mindustry.maps.generators.BaseGenerator;
+import mindustry.type.Sector;
 import mindustry.world.Block;
 import mindustry.world.Tile;
-import mindustry.world.blocks.Floor;
-import mindustry.world.blocks.StaticWall;
+import mindustry.world.Tiles;
+import mindustry.world.blocks.environment.Floor;
+import mindustry.world.blocks.environment.StaticWall;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ import static mindustry.Vars.maps;
 import static mindustry.Vars.world;
 
 
-public class PlagueGenerator extends Generator{
+public class PlagueGenerator extends BaseGenerator{
 
     // elevation --->
     // temperature
@@ -38,13 +40,8 @@ public class PlagueGenerator extends Generator{
 
     // Fix this generation later
 
-
-    public PlagueGenerator() {
-        super(size, size);
-    }
-
     @Override
-    public void generate(Tile[][] tiles) {
+    public void generate(Tiles tiles, Seq<Tile> cores, Tile spawn, Team team, Sector sector, float difficulty) {
 
         GenerateInput in = new GenerateInput();
 
@@ -63,15 +60,15 @@ public class PlagueGenerator extends Generator{
         int cy = size / 2;
         double centreDist = 0;
 
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 Block wall;
                 Block floor = Blocks.darksand;
                 centreDist = Math.sqrt(Math.pow(cx - x, 2) + Math.pow(cy - y, 2));
                 if (centreDist < 100) {
                     wall = Blocks.air;
                 }else {
-                    wall = Blocks.duneRocks;
+                    wall = Blocks.duneWall;
                 }
 
 
@@ -79,7 +76,7 @@ public class PlagueGenerator extends Generator{
 
                 in.floor = floor;
                 in.block = wall;
-                in.ore = ore;
+                in.overlay = ore;
                 in.x = x;
                 in.y = y;
                 in.width = in.height = size;
@@ -92,23 +89,22 @@ public class PlagueGenerator extends Generator{
                 }
 
                 if(x == 0 || x == size-1 || y == 0 || y == size-1){
-                    in.block = Blocks.duneRocks;
+                    in.block = Blocks.duneWall;
                 }
 
-
-                tiles[x][y] = new Tile(x, y, in.floor.id, in.ore.id, in.block.id);
+                tiles.set(x,y, new Tile(x, y, in.floor.id, in.overlay.id, in.block.id));
             }
         }
 
-        tiles[size/2][size/2].setNet(Blocks.coreFoundation, Team.crux, 0);
-        tiles[size/2][size/2+10].setNet(Blocks.powerSource, Team.crux, 0);
+        tiles.get(size/2,size/2).setNet(Blocks.coreFoundation, Team.crux, 0);
+        tiles.get(size/2,size/2+10).setNet(Blocks.powerSource, Team.crux, 0);
 
-        world.setMap(new Map(StringMap.of("name", "Patient Zero", "author", "Recessive")));
+        world.loadMap(new Map(StringMap.of("name", "Patient Zero", "author", "Recessive")));
     }
 
-    public static void defaultOres(Tile[][] tiles){
+    public static void defaultOres(Tiles tiles){
         GenerateInput in = new GenerateInput();
-        Array<GenerateFilter> ores = new Array<>();
+        Seq<GenerateFilter> ores = new Seq<>();
         maps.addDefaultOres(ores);
         ores.each(o -> ((OreFilter) o).threshold -= 0.05f);
         ores.insert(0, new OreFilter() {{
@@ -117,66 +113,66 @@ public class PlagueGenerator extends Generator{
         }});
 
         in.floor = (Floor) Blocks.darksand;
-        in.block = Blocks.duneRocks ;
+        in.block = Blocks.duneWall ;
         in.width = in.height = size;
 
-        for (int x = 0; x < tiles.length; x++) {
-            for (int y = 0; y < tiles[x].length; y++) {
-                in.ore = Blocks.air;
+        for (int x = 0; x < tiles.width; x++) {
+            for (int y = 0; y < tiles.height; y++) {
+                in.overlay = Blocks.air;
                 in.x = x;
                 in.y = y;
 
-                if(tiles[x][y].floor().isLiquid) continue;
+                if(tiles.get(x,y).floor().isLiquid) continue;
 
                 for (GenerateFilter f : ores) {
                     f.apply(in);
                 }
-                tiles[x][y].setOverlay(in.ore);
+                tiles.get(x,y).setOverlay(in.overlay);
             }
         }
     }
 
-    private static void perimeterFlood(List<Tile> tileFlood, int[][] floodGrid, Tile[][] tiles){
+    private static void perimeterFlood(List<Tile> tileFlood, int[][] floodGrid, Tiles tiles){
         while(!tileFlood.isEmpty()){
 
             Tile t = tileFlood.remove(0);
 
-            if (t.x+1 < tiles.length && floodGrid[t.x+1][t.y] == 0) {
+            if (t.x+1 < tiles.width && floodGrid[t.x+1][t.y] == 0) {
                 floodGrid[t.x+1][t.y] = 1;
-                tileFlood.add(tiles[t.x+1][t.y]);
+                tileFlood.add(tiles.get(t.x+1,t.y));
             }
             if (t.x-1 > 0 && floodGrid[t.x-1][t.y] == 0) {
                 floodGrid[t.x-1][t.y] = 1;
-                tileFlood.add(tiles[t.x-1][t.y]);
+                tileFlood.add(tiles.get(t.x-1, t.y));
             }
-            if (t.y+1 < tiles[0].length && floodGrid[t.x][t.y+1] == 0) {
+            if (t.y+1 < tiles.width && floodGrid[t.x][t.y+1] == 0) {
                 floodGrid[t.x][t.y+1] = 1;
-                tileFlood.add(tiles[t.x][t.y+1]);
+                tileFlood.add(tiles.get(t.x, t.y+1));
             }
             if (t.y-1 > 0 && floodGrid[t.x][t.y-1] == 0) {
                 floodGrid[t.x][t.y-1] = 1;
-                tileFlood.add(tiles[t.x][t.y-1]);
+                tileFlood.add(tiles.get(t.x, t.y-1));
             }
         }
     }
 
-    public static void inverseFloodFill(Tile[][] tiles, int cx, int cy){
+    public static void inverseFloodFill(Tiles tiles, int cx, int cy){
         int[][] floodGrid = new int[size][size];
-        for(int x = 0; x < tiles.length; x++){
-            for(int y = 0; y < tiles[0].length; y++){
-                if(tiles[x][y].block() instanceof StaticWall || tiles[x][y].floor().isDeep()){
+        for(int x = 0; x < tiles.width; x++){
+            for(int y = 0; y < tiles.height; y++){
+                if(tiles.get(x,y).block() instanceof StaticWall || tiles.get(x,y).floor().isDeep()){
                     floodGrid[x][y] = 2;
                 }
             }
         }
         List<Tile> tileFlood = new ArrayList<>();
-        tileFlood.add(tiles[cx][cy]);
+        tileFlood.add(tiles.get(cx, cy));
         perimeterFlood(tileFlood, floodGrid, tiles);
 
-        for (int x = 0; x < tiles.length; x++) {
-            for (int y = 0; y < tiles[0].length; y++) {
+        for (int x = 0; x < tiles.width; x++) {
+            for (int y = 0; y < tiles.height; y++) {
                 if (floodGrid[x][y] == 0){
-                    tiles[x][y].setBlock(Blocks.duneRocks);
+                    tiles.get(x,y).setBlock(Blocks.duneWall);
                 }
             }
         }
@@ -185,10 +181,15 @@ public class PlagueGenerator extends Generator{
 
 class tendrilFilter extends GenerateFilter{
     public float scl = 40, threshold = 0.5f, octaves = 3f, falloff = 0.5f;
-    public Block floor = Blocks.stone, block = Blocks.rocks;
+    public Block floor = Blocks.stone, block = Blocks.stoneWall;
 
     public boolean blockGen = true;
     public boolean floorGen = true;
+
+    @Override
+    public FilterOption[] options() {
+        return new FilterOption[0];
+    }
 
     @Override
     public void apply(){
