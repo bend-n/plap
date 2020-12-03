@@ -96,7 +96,11 @@ public class PlagueGenerator{
             }
         }
 
-        tiles.get(size/2,size/2).setNet(Blocks.coreFoundation, Team.purple, 0);
+        tiles.get(size/2,size/2).setNet(Blocks.coreNucleus, Team.purple, 0);
+        tiles.get(size/2,size/2+25).setNet(Blocks.coreShard, Team.purple, 0);
+        tiles.get(size/2+25,size/2).setNet(Blocks.coreShard, Team.purple, 0);
+        tiles.get(size/2,size/2-25).setNet(Blocks.coreShard, Team.purple, 0);
+        tiles.get(size/2-25,size/2).setNet(Blocks.coreShard, Team.purple, 0);
         tiles.get(size/2,size/2+10).setNet(Blocks.powerSource, Team.purple, 0);
 
         Vars.state.map = new Map(StringMap.of("name", "Patient Zero", "author", "Recessive"));
