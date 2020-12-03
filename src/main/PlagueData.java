@@ -51,7 +51,6 @@ public class PlagueData {
     public static final ObjectSet<Block> survivorBanned;
     static {
         survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.groundFactory, Blocks.navalFactory,
-                Blocks.additiveReconstructor, Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor,
                 Blocks.tetrativeReconstructor, Blocks.phaseWall, Blocks.phaseWallLarge,
                 Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
