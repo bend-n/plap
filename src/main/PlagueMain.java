@@ -196,10 +196,10 @@ public class PlagueMain extends Plugin {
 
 
             if(interval.get(timerTenMin, tenMinTime)){
-                multiplier *= 1.05;
-                state.rules.unitDamageMultiplier *= 1.05;
-                state.rules.unitHealthMultiplier *= 1.05;
-                Call.sendMessage("[accent]Units now deal [scarlet]5%[accent] more damage and have [scarlet]5%[accent] more health");
+                multiplier *= 1.1;
+                state.rules.unitDamageMultiplier *= 1.1;
+                state.rules.unitHealthMultiplier *= 1.1;
+                Call.sendMessage("[accent]Units now deal [scarlet]10%[accent] more damage and have [scarlet]10%[accent] more health");
                 for(Team t : teams.keySet()){
                     if(t != Team.purple){
                         for(CustomPlayer cPly : teams.get(t).players){
@@ -391,7 +391,6 @@ public class PlagueMain extends Plugin {
                 currMap = Integer.parseInt(args[0]);
             }
             logic.reset();
-            Blocks.powerSource.health = Integer.MAX_VALUE;
             if(currMap == 0){
                 PlagueGenerator generator = new PlagueGenerator();
                 world.loadGenerator(601, 601, generator::generate);
@@ -409,7 +408,6 @@ public class PlagueMain extends Plugin {
             world.beginMapLoad();
             PlagueGenerator.inverseFloodFill(world.tiles, plagueCore[0], plagueCore[1]);
             PlagueGenerator.defaultOres(world.tiles);
-            tile.build.indestructible = true;
             world.endMapLoad();
 
 

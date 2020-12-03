@@ -97,11 +97,17 @@ public class PlagueGenerator{
         }
 
         tiles.get(size/2,size/2).setNet(Blocks.coreNucleus, Team.purple, 0);
+        tiles.get(size/2,size/2).build.indestructible = true;
         tiles.get(size/2,size/2+25).setNet(Blocks.coreShard, Team.purple, 0);
+        tiles.get(size/2,size/2+25).build.indestructible = true;
         tiles.get(size/2+25,size/2).setNet(Blocks.coreShard, Team.purple, 0);
+        tiles.get(size/2+25,size/2).build.indestructible = true;
         tiles.get(size/2,size/2-25).setNet(Blocks.coreShard, Team.purple, 0);
+        tiles.get(size/2,size/2-25).build.indestructible = true;
         tiles.get(size/2-25,size/2).setNet(Blocks.coreShard, Team.purple, 0);
+        tiles.get(size/2-25,size/2).build.indestructible = true;
         tiles.get(size/2,size/2+10).setNet(Blocks.powerSource, Team.purple, 0);
+        tiles.get(size/2,size/2+10).build.indestructible = true;
 
         Vars.state.map = new Map(StringMap.of("name", "Patient Zero", "author", "Recessive"));
     }
