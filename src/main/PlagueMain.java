@@ -32,6 +32,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.prefs.Preferences;
@@ -65,6 +66,7 @@ public class PlagueMain extends Plugin {
     private boolean newRecord = false;
 
     private float multiplier = 1;
+    private static DecimalFormat df = new DecimalFormat("0.00");
 
     private int[] plagueCore = new int[2];
 
@@ -202,7 +204,8 @@ public class PlagueMain extends Plugin {
                 multiplier *= 1.1;
                 state.rules.unitDamageMultiplier *= 1.1;
                 state.rules.unitHealthMultiplier *= 1.1;
-                Call.sendMessage("[accent]Units now deal [scarlet]10%[accent] more damage and have [scarlet]10%[accent] more health");
+                Call.sendMessage("[accent]Units now deal [scarlet]10%[accent] more damage and have [scarlet]10%[accent] more health " +
+                        "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
                 for(Team t : teams.keySet()){
                     if(t != Team.purple){
                         for(CustomPlayer cPly : teams.get(t).players){
