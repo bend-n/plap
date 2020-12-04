@@ -53,10 +53,11 @@ public class PlagueMain extends Plugin {
         put(Team.blue, "[royal]");
     }};
 
-    private final static int corePlaceTime = 60 * 20, damageMultiplyTime = 60 * 60 * 30, secondTime = 60,
-            tenMinTime = 60 * 60 * 10;
-    private final static int timerCorePlace = 0, timerDamageMultiply = 1, timerSecond = 2, timerTenMin = 3;
-    private Interval interval = new Interval(10);
+    private final static int corePlaceTime = 20, pointTime = 60 * 30,
+            tenMinTime = 60 * 10;
+    private RTInterval corePlaceInterval = new RTInterval(corePlaceTime),
+            pointInterval = new RTInterval(pointTime),
+            tenMinInterval = new RTInterval(tenMinTime);
 
     private float realTime = 0f;
     private int seconds = 0;
@@ -79,6 +80,8 @@ public class PlagueMain extends Plugin {
 
     private boolean pregame = true;
     private boolean survivedToPoint = false;
+
+    private static long startTime = System.currentTimeMillis();
 
 
     @Override
@@ -153,7 +156,7 @@ public class PlagueMain extends Plugin {
         int[] counts = {0};
         Events.on(EventType.Trigger.class, event ->{
 
-            if(interval.get(timerDamageMultiply, damageMultiplyTime)){
+            if(pointInterval.get(seconds)){
                 survivedToPoint = true;
                 for(Team t : teams.keySet()){
                     if(t != Team.purple){
@@ -167,7 +170,7 @@ public class PlagueMain extends Plugin {
                     }
                 }
             }
-            if(counts[0] < 6 && interval.get(timerCorePlace, corePlaceTime)){
+            if(counts[0] < 6 && corePlaceInterval.get(seconds)){
                 counts[0] ++;
                 if(counts[0] == 6){
                     pregame = false;
@@ -186,8 +189,8 @@ public class PlagueMain extends Plugin {
                 }
             }
 
-            realTime += Time.delta;
-            seconds = (int) (realTime / 60);
+            realTime = System.currentTimeMillis() - startTime;
+            seconds = (int) (realTime / 1000);
 
             if(seconds > record && !newRecord){
                 Call.sendMessage("[gold]New survivor record!");
@@ -195,7 +198,7 @@ public class PlagueMain extends Plugin {
             }
 
 
-            if(interval.get(timerTenMin, tenMinTime)){
+            if(tenMinInterval.get(seconds)){
                 multiplier *= 1.1;
                 state.rules.unitDamageMultiplier *= 1.1;
                 state.rules.unitHealthMultiplier *= 1.1;
