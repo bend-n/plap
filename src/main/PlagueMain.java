@@ -561,6 +561,9 @@ public class PlagueMain extends Plugin {
         rules.modeName = "Plague";
 
         ((UnitFactory) Blocks.airFactory).plans.get(0).unit = UnitTypes.mono;
+        ((Reconstructor) Blocks.multiplicativeReconstructor).constructTime = 0;
+        ((Reconstructor) Blocks.exponentialReconstructor).constructTime = 0;
+        ((Reconstructor) Blocks.tetrativeReconstructor).constructTime = 0;
 
         /*((UnitFactory) Blocks.airFactory).capacities = new int[]{1, 50};*/
 

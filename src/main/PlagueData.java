@@ -52,8 +52,7 @@ public class PlagueData {
     static {
         survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.groundFactory, Blocks.navalFactory,
                 Blocks.tetrativeReconstructor, Blocks.phaseWall, Blocks.phaseWallLarge,
-                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.logicProcessor, Blocks.hyperProcessor,
-                Blocks.foreshadow);
+                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
 
     public static final ObjectSet<Block> plagueBanned;
@@ -68,8 +67,7 @@ public class PlagueData {
                 Blocks.surgeWall, Blocks.surgeWallLarge, Blocks.thoriumWall, Blocks.thoriumWallLarge, Blocks.phaseWall,
                 Blocks.phaseWallLarge, Blocks.titaniumWall, Blocks.titaniumWallLarge, Blocks.copperWallLarge,
                 Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
-                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.logicProcessor, Blocks.hyperProcessor,
-                Blocks.tetrativeReconstructor);
+                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
 
     public static final Weapon daggerWepaon = new Weapon("dagger-weapon") {
