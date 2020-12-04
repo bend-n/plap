@@ -236,6 +236,7 @@ public class PlagueMain extends Plugin {
             }
             CustomPlayer cPly = uuidMapping.get(event.player.uuid());
             cPly.player = event.player;
+            cPly.rawName = event.player.name;
 
             playerDB.safePut(event.player.uuid(),"latestName", StringHandler.determineRank(cPly.startingXP) + event.player.name);
 
@@ -372,6 +373,15 @@ public class PlagueMain extends Plugin {
                 if(event.tile.build.items.has(Items.thorium, 997)){
                     event.tile.build.tile.setNet(Blocks.coreShard, event.tile.team(), 0);
                 }
+            }
+        });
+
+        Events.on(EventType.CustomEvent.class, event ->{
+            if(event.value instanceof String[] && ((String[]) event.value)[0].equals("newName")){
+                String[] val = (String[]) event.value;
+                Player ply = uuidMapping.get(val[1]).player;
+                uuidMapping.get(val[1]).rawName = ply.name;
+                ply.name = StringHandler.determineRank((int) playerDB.safeGet(val[1],"xp")) + " " + ply.name;
             }
         });
     }
@@ -635,8 +645,7 @@ public class PlagueMain extends Plugin {
 
         CustomPlayer cPly = uuidMapping.get(ply.uuid());
         ply.name = StringHandler.determineRank(cPly.startingXP) +
-                colorMapping.getOrDefault(ply.team(), "[olive]") +
-                (ply.donateLevel != 0 ? cPly.rawName : Strings.stripColors(cPly.rawName));
+                colorMapping.getOrDefault(ply.team(), "[olive]") + " " + cPly.rawName;
     }
 
     private float cartesianDistance(float x, float y, float cx, float cy){
