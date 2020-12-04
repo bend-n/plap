@@ -631,6 +631,11 @@ public class PlagueMain extends Plugin {
                 }
             }
         }
+        for(Unit u : Groups.unit){
+            if(u.team == team){
+                u.kill();
+            }
+        }
     }
 
     private void updateName(Player ply){
