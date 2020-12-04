@@ -132,7 +132,7 @@ public class PlagueMain extends Plugin {
 
 
 
-                CoreBlock.CoreBuild closestCore = state.teams.closestCore(action.tile.x, action.tile.y, action.player.team());
+                /*CoreBlock.CoreBuild closestCore = state.teams.closestCore(action.tile.x, action.tile.y, action.player.team());
                 if(closestCore != null && action.block != null){
                     float cx = closestCore.block.size % 2 == 0 ? (float) (closestCore.tile.x + 0.5) : closestCore.tile.x;
                     float cy = closestCore.block.size % 2 == 0 ? (float) (closestCore.tile.y + 0.5) : closestCore.tile.y;
@@ -140,7 +140,7 @@ public class PlagueMain extends Plugin {
                             && action.block == Blocks.unloader && action.player.team() == Team.purple) {
                         return false;
                     }
-                }
+                }*/
             }
 
             return true;
