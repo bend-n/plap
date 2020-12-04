@@ -405,7 +405,8 @@ public class PlagueMain extends Plugin {
 
             loadedMap = state.map;
 
-            Tile tile = state.teams.cores(Team.purple).get(0).tile;
+            Tile tile = state.teams.cores(Team.purple).find(build -> build.block == Blocks.coreNucleus).tile;
+
             plagueCore[0] = tile.x;
             plagueCore[1] = tile.y;
             world.beginMapLoad();
