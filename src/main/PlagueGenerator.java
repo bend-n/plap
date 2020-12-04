@@ -132,7 +132,7 @@ public class PlagueGenerator{
                 in.x = x;
                 in.y = y;
 
-                if(tiles.get(x,y).floor().isLiquid) continue;
+                if(tiles.get(x,y).floor().isLiquid || !tiles.get(x,y).floor().placeableOn) continue;
 
                 for (GenerateFilter f : ores) {
                     f.apply(in);
