@@ -547,7 +547,7 @@ public class PlagueMain extends Plugin {
 
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
-        rules.buildSpeedMultiplier = 2;
+        rules.buildSpeedMultiplier = 4;
 
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
