@@ -88,7 +88,7 @@ public class PlagueMain extends Plugin {
 
     @Override
     public void init(){
-        mapDB.connect("data/server_data.db");
+        mapDB.connect("../network-files/plague_data.db");
         playerDB.connect(mapDB.conn);
 
         initRules();
@@ -561,6 +561,8 @@ public class PlagueMain extends Plugin {
         rules.modeName = "Plague";
 
         ((UnitFactory) Blocks.airFactory).plans.get(0).unit = UnitTypes.mono;
+        ((UnitFactory) Blocks.airFactory).plans.get(0).time = 129037f;
+        ((UnitFactory) Blocks.airFactory).plans.get(0).requirements = ItemStack.empty;
         ((Reconstructor) Blocks.multiplicativeReconstructor).constructTime /= 2;
         ((Reconstructor) Blocks.exponentialReconstructor).constructTime /= 2;
         ((Reconstructor) Blocks.tetrativeReconstructor).constructTime /= 2;
