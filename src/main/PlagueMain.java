@@ -19,6 +19,7 @@ import mindustry.mod.Plugin;
 import mindustry.net.*;
 import mindustry.net.Net;
 import mindustry.type.ItemStack;
+import mindustry.type.UnitType;
 import mindustry.type.Weapon;
 import mindustry.world.Block;
 import mindustry.world.Build;
@@ -203,7 +204,10 @@ public class PlagueMain extends Plugin {
             if(tenMinInterval.get(seconds)){
                 multiplier *= 1.1;
                 state.rules.unitDamageMultiplier *= 1.1;
-                state.rules.unitHealthMultiplier *= 1.1;
+
+                for(UnitType u : Vars.content.units()){
+                    u.health *= 1.1;
+                }
 
                 Call.sendMessage("[accent]Units now deal [scarlet]10%[accent] more damage and have [scarlet]10%[accent] more health " +
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
