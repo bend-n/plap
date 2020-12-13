@@ -204,6 +204,7 @@ public class PlagueMain extends Plugin {
                 multiplier *= 1.1;
                 state.rules.unitDamageMultiplier *= 1.1;
                 state.rules.unitHealthMultiplier *= 1.1;
+
                 Call.sendMessage("[accent]Units now deal [scarlet]10%[accent] more damage and have [scarlet]10%[accent] more health " +
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
                 for(Team t : teams.keySet()){
@@ -556,6 +557,10 @@ public class PlagueMain extends Plugin {
         UnitTypes.mega.weapons = new Seq<>();
         UnitTypes.quad.weapons = new Seq<>();
         UnitTypes.oct.weapons = new Seq<>();
+
+        UnitTypes.mega.payloadCapacity = 0f;
+        UnitTypes.quad.payloadCapacity = 0f;
+        UnitTypes.oct.payloadCapacity = 0f;
 
         rules.fire = false;
         rules.modeName = "Plague";
