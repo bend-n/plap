@@ -483,9 +483,7 @@ public class PlagueMain extends Plugin {
         handler.register("manual_reset", "Perform a manual reset of xp and points", args -> {
             rankReset();
             winsReset();
-            mapDB.safePut(mapID, "survivorRecord", 0);
-            mapDB.safePut(mapID, "avgSurvived", 0);
-            mapDB.safePut(mapID, "plays", 0);
+            mapStatsReset();
             Log.info("ranks, monthly wins and monthly data have been reset");
         });
 
@@ -769,6 +767,15 @@ public class PlagueMain extends Plugin {
 
     }
 
+    void mapStatsReset(){
+        // reset monthly records
+        mapDB.setColumn("monthRecord", 0);
+
+        for(Object uuid: mapDB.entries.keySet().toArray()){
+            mapDB.safePut((String) uuid,"monthRecord", 0);
+        }
+    }
+
 
     void rankReset(){
         // Reset ranks
@@ -780,10 +787,14 @@ public class PlagueMain extends Plugin {
     }
 
     void winsReset(){
-        playerDB.setColumn("monthWins", 0);
+        playerDB.setColumn("survivorRecord", 0);
+        playerDB.setColumn("avgSurvived", 0);
+        playerDB.setColumn("plays", 0);
 
         for(Object uuid: playerDB.entries.keySet().toArray()){
-            playerDB.safePut((String) uuid,"monthWins", 0);
+            playerDB.safePut((String) uuid,"survivorRecord", 0);
+            playerDB.safePut((String) uuid,"avgSurvived", 0);
+            playerDB.safePut((String) uuid,"plays", 0);
         }
     }
 
