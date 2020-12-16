@@ -768,11 +768,14 @@ public class PlagueMain extends Plugin {
     }
 
     void mapStatsReset(){
-        // reset monthly records
-        mapDB.setColumn("monthRecord", 0);
+        mapDB.setColumn("survivorRecord", 0);
+        mapDB.setColumn("avgSurvived", 0);
+        mapDB.setColumn("plays", 0);
 
         for(Object uuid: mapDB.entries.keySet().toArray()){
-            mapDB.safePut((String) uuid,"monthRecord", 0);
+            mapDB.safePut((String) uuid,"survivorRecord", 0);
+            mapDB.safePut((String) uuid,"avgSurvived", 0);
+            mapDB.safePut((String) uuid,"plays", 0);
         }
     }
 
@@ -787,14 +790,10 @@ public class PlagueMain extends Plugin {
     }
 
     void winsReset(){
-        playerDB.setColumn("survivorRecord", 0);
-        playerDB.setColumn("avgSurvived", 0);
-        playerDB.setColumn("plays", 0);
+        playerDB.setColumn("monthWins", 0);
 
         for(Object uuid: playerDB.entries.keySet().toArray()){
-            playerDB.safePut((String) uuid,"survivorRecord", 0);
-            playerDB.safePut((String) uuid,"avgSurvived", 0);
-            playerDB.safePut((String) uuid,"plays", 0);
+            playerDB.safePut((String) uuid,"monthWins", 0);
         }
     }
 
