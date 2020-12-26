@@ -25,6 +25,7 @@ import mindustry.world.Block;
 import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.Tiles;
+import mindustry.world.blocks.sandbox.PowerSource;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.units.Reconstructor;
 import mindustry.world.blocks.units.UnitFactory;
@@ -573,6 +574,8 @@ public class PlagueMain extends Plugin {
         ((Reconstructor) Blocks.multiplicativeReconstructor).constructTime /= 2;
         ((Reconstructor) Blocks.exponentialReconstructor).constructTime /= 2;
         ((Reconstructor) Blocks.tetrativeReconstructor).constructTime /= 2;
+
+        ((PowerSource) Blocks.powerSource).powerProduction = 696969f;
 
         /*((UnitFactory) Blocks.airFactory).capacities = new int[]{1, 50};*/
 
