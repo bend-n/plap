@@ -164,13 +164,17 @@ public class PlagueMain extends Plugin {
                             updatePlayer(ply);
                         }
                     }
-                    if(teams.size() == 1){
-                        endgame(new Seq<>());
-                    }
-                    Call.sendMessage("[accent]The game has started! [green]Survivors[accent] must survive for [gold]" +
-                            winTime + "[accent] minutes to win!");
 
                     teams.remove(Team.blue);
+                    if(teams.size() == 1){
+                        endgame(new Seq<>());
+                    }else{
+                        Call.sendMessage("[accent]The game has started! [green]Survivors[accent] must survive for [gold]" +
+                                winTime + "[accent] minutes to win!");
+                    }
+
+
+
 
                 }else{
                     Call.announce("[accent]You have [scarlet]" + (120 - counts[0]*20) +
