@@ -181,6 +181,7 @@ public class PlagueMain extends Plugin {
                                 "The plague are now extremely powerful and will only get worse. Defend the noble few for as long as possible!");
                         CustomPlayer cPly = uuidMapping.get(player.uuid());
                         cPly.monthWins++;
+                        cPly.wins++;
                         player.sendMessage("[gold]+1 wins[accent] for a total of [gold]" + cPly.monthWins + "[accent] wins!");
                         int addXp = 500 * (cPly.player.donatorLevel + 1);
                         cPly.xp += addXp;
@@ -213,6 +214,8 @@ public class PlagueMain extends Plugin {
             CustomPlayer cPly = uuidMapping.get(event.player.uuid());
             cPly.player = event.player;
             cPly.rawName = event.player.name;
+            cPly.xp = (int) entries.get("plagueXP");
+            cPly.monthWins = (int) entries.get("plagueMonthWins");
 
             updatePlayer(event.player);
 
@@ -232,13 +235,7 @@ public class PlagueMain extends Plugin {
         Events.on(EventType.PlayerLeave.class, event -> {
 
 
-
-            CustomPlayer cPly = uuidMapping.get(event.player.uuid());
-            cPly.connected = false;
-            String[] keys = {"plagueXP"}; // Add wins here
-            Object[] vals = {cPly.xp};
-
-            db.saveRow("mindustry_data", "uuid", event.player.uuid(), keys, vals);
+            savePlayerData(event.player.uuid());
 
 
         });
@@ -542,7 +539,7 @@ public class PlagueMain extends Plugin {
             int i = 0;
             while(rs.next()){
                 i ++;
-                s += "\n[gold]" + (i) + "[white]:" + rs.getString("latestName") + "[accent]: [gold]" + rs.getString("monthWins") + "[accent] points";
+                s += "\n[gold]" + (i) + "[white]:" + rs.getString("latestName") + "[accent]: [gold]" + rs.getString("plagueMonthWins") + "[accent] points";
             }
             rs.close();
         } catch (SQLException throwables) {
@@ -614,10 +611,12 @@ public class PlagueMain extends Plugin {
             return;
         }
         Log.info("PLAGUE: Saving " + uuid + " data...");
-        Player player = uuidMapping.get(uuid).player;
+        CustomPlayer cPly = uuidMapping.get(uuid);
 
-        db.saveRow("mindustry_data", "uuid", uuid, new String[]{"xp"},
-                new Object[]{player.playTime, uuidMapping.get(uuid).xp});
+        String[] keys = {"plagueXP", "plagueMonthWins", "plagueWins"};
+        Object[] vals = {cPly.xp, cPly.monthWins, cPly.wins};
+
+        db.saveRow("mindustry_data", "uuid", uuid, keys, vals);
     }
 
     void endgame(Seq<CustomPlayer> winners){
@@ -726,7 +725,7 @@ public class PlagueMain extends Plugin {
     }
 
     void winsReset(){
-        db.setColumn("mindustry_data", "monthWins", 0);
+        db.setColumn("mindustry_data", "plagueMonthWins", 0);
 
     }
 

@@ -11,6 +11,7 @@ public class CustomPlayer {
     public Team team;
     public int xp;
     public int monthWins;
+    public int wins;
 
     public boolean connected = true;
 
