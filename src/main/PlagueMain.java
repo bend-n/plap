@@ -243,13 +243,19 @@ public class PlagueMain extends Plugin {
             }
 
             if(oneMinInterval.get(seconds)){
-                Call.infoPopup("[accent]Time survived: [orange]" + seconds/60 + "[accent] mins.\n" +
-                                "All-time map record: [gold]" + mapRecord / 60 + "[accent] mins.",
+                Call.infoPopup("[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
+                                "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.",
                         60, 10, 120, 0, 140, 0);
             }
 
             });
 
+
+        Events.on(EventType.UnitCreateEvent.class, event ->{
+            if(event.unit.type == UnitTypes.flare && event.unit.team != Team.purple){
+                event.unit.health = 0;
+            }
+        });
 
         Events.on(EventType.PlayerJoinSecondary.class, event ->{
             if(!db.hasRow("mindustry_data", "uuid", event.player.uuid())){
@@ -289,8 +295,8 @@ public class PlagueMain extends Plugin {
 
             event.player.sendMessage(leaderboardString);
 
-            Call.infoPopup(event.player.con, "[accent]Time survived: [orange]" + seconds/60 + "[accent] mins.\n" +
-                            "All-time map record: [gold]" + mapRecord / 60 + "[accent] mins.",
+            Call.infoPopup(event.player.con, "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
+                            "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.",
                     60, 10, 120, 0, 140, 0);
         });
 
@@ -362,10 +368,6 @@ public class PlagueMain extends Plugin {
                 }
             }catch(NullPointerException e){
                 e.printStackTrace();
-            }
-
-            if(event.team != Team.purple && event.tile.block() == Blocks.airFactory){
-                ((UnitFactory) event.tile.block()).plans.get(0).time = 129037f;
             }
 
         });
