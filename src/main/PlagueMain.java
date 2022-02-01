@@ -174,6 +174,8 @@ public class PlagueMain extends Plugin {
                     Call.announce("[accent]You have [scarlet]" + (120 - counts[0]*20) +
                             " [accent]seconds left to place a core. Place any block to place a core.");
                 }
+
+                teams.remove(Team.blue);
             }
 
             realTime = System.currentTimeMillis() - startTime;
