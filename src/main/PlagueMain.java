@@ -65,7 +65,11 @@ public class PlagueMain extends Plugin {
         put(Team.blue, "[royal]");
     }};
 
-    private RTInterval corePlaceInterval = new RTInterval(20);
+    private RTInterval corePlaceInterval = new RTInterval(20),
+        tenMinInterval = new RTInterval(60 * 10);
+
+    private int multiplier = 1;
+    private static DecimalFormat df = new DecimalFormat("0.00");
 
     private int winTime = 45; // In minutes
 
@@ -224,7 +228,18 @@ public class PlagueMain extends Plugin {
                 Call.sendMessage("[gold]New record![accent]Old record of[gold]" + mapRecord + "[accent]was beaten!");
             }
 
-        });
+            if(tenMinInterval.get(seconds)) {
+                multiplier *= 1.5;
+                state.rules.unitDamageMultiplier *= 1.5;
+
+                for (UnitType u : Vars.content.units()) {
+                    u.health *= 1.5;
+                }
+                Call.sendMessage("[accent]Units now deal [scarlet]50%[accent] more damage and have [scarlet]50%[accent] more health " +
+                        "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
+            }
+
+            });
 
 
         Events.on(EventType.PlayerJoinSecondary.class, event ->{
@@ -654,11 +669,15 @@ public class PlagueMain extends Plugin {
         if(ply.team() == Team.purple){
             Rules tempRules = rules.copy();
             tempRules.bannedBlocks = PlagueData.plagueBanned;
-            Call.setRules(ply.con, tempRules);
+            for(int i=0; i<5; i++){ // Just making sure the packet gets there
+                Call.setRules(ply.con, tempRules);
+            }
         }else if (ply.team() != Team.blue){
             Rules tempRules = rules.copy();
             tempRules.bannedBlocks = PlagueData.survivorBanned;
-            Call.setRules(ply.con, tempRules);
+            for(int i=0; i<5; i++){ // Just making sure the packet gets there
+                Call.setRules(ply.con, tempRules);
+            }
         }
 
 
