@@ -1,3 +1,3 @@
 # Plague plugin by Recessive
 
-## Do not copy. 
+## longer update times than Cube World

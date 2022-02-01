@@ -52,7 +52,7 @@ public class PlagueData {
     static {
         survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.groundFactory, Blocks.navalFactory,
                 Blocks.tetrativeReconstructor, Blocks.phaseWall, Blocks.phaseWallLarge,
-                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor,
+                Blocks.logicDisplay, Blocks.largeLogicDisplay, // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor,
                 Blocks.additiveReconstructor, Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor,
                 Blocks.tetrativeReconstructor);
     }
@@ -69,35 +69,8 @@ public class PlagueData {
                 Blocks.surgeWall, Blocks.surgeWallLarge, Blocks.thoriumWall, Blocks.thoriumWallLarge, Blocks.phaseWall,
                 Blocks.phaseWallLarge, Blocks.titaniumWall, Blocks.titaniumWallLarge, Blocks.copperWallLarge,
                 Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
-                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
+                Blocks.logicDisplay, Blocks.largeLogicDisplay); // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
-
-    public static final Weapon daggerWepaon = new Weapon("dagger-weapon") {
-        {
-            this.reload = 14.0F;
-            this.alternate = true;
-            this.bullet = Bullets.standardCopper;
-        }};
-
-    public static final Weapon titanWepaon = new Weapon("titan-weapon") {
-        {
-            this.shootSound = Sounds.flame;
-            this.reload = 7F;
-            this.alternate = true;
-            this.recoil = 1.0F;
-            this.ejectEffect = Fx.none;
-            this.bullet = Bullets.basicFlame;
-        }};
-
-    public static final Weapon fortressWepaon = new Weapon("fortress-weapon") {
-        {
-            this.reload = 40.0F;
-            this.alternate = true;
-            this.recoil = 4.0F;
-            this.shake = 2.0F;
-            this.bullet = Bullets.artilleryDense;
-            this.shootSound = Sounds.artillery;
-        }};
 
 
     public static int getRandomWithExclusion(int start, int end, int... exclude) {
