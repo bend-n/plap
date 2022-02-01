@@ -320,10 +320,10 @@ public class PlagueMain extends Plugin {
                 return;
             }
             try {
-                /*if(event.team == Team.purple && cartesianDistance(event.tile.x, event.tile.y,
-                        plagueCore[0], plagueCore[1]) < world.height()/4){
+                if(event.team == Team.purple && cartesianDistance(event.tile.x, event.tile.y,
+                        plagueCore[0], plagueCore[1]) < world.height()/10){
                     event.tile.build.indestructible = true;
-                }*/
+                }
             }catch(NullPointerException e){
                 e.printStackTrace();
             }
@@ -407,6 +407,18 @@ public class PlagueMain extends Plugin {
             loadedMap = state.map;
 
             Tile tile = state.teams.cores(Team.purple).find(build -> build.block == Blocks.coreNucleus).tile;
+
+            // Make cores and power source indestructible
+            state.teams.cores(Team.purple).each(coreBuild -> coreBuild.indestructible = true);
+            for(int x = 0; x < world.width(); x++){
+                for(int y = 0; y < world.height(); y++){
+                    Tile _ = world.tile(x, y);
+                    if(_.build != null && _.build.block.equals(Blocks.powerSource)){
+                        _.build.indestructible = true;
+                    }
+                }
+            }
+
 
             plagueCore[0] = tile.x;
             plagueCore[1] = tile.y;
