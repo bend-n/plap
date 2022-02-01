@@ -528,6 +528,13 @@ public class PlagueMain extends Plugin {
         // rules.playerDamageMultiplier = 0;
         rules.buildSpeedMultiplier = 4;
 
+        polyWeapons = UnitTypes.poly.weapons.copy();
+        megaWeapon = UnitTypes.mega.weapons.copy();
+        quadWeapon = UnitTypes.quad.weapons.copy();
+        octWeapon = UnitTypes.oct.weapons.copy();
+
+        defaultFlareTime = ((UnitFactory) Blocks.airFactory).plans.get(0).time;
+
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
@@ -547,13 +554,6 @@ public class PlagueMain extends Plugin {
         ((UnitFactory) Blocks.airFactory).plans.get(0).time = 129037f;
 
         ((PowerSource) Blocks.powerSource).powerProduction = 696969f;
-
-        polyWeapons = UnitTypes.poly.weapons.copy();
-        megaWeapon = UnitTypes.mega.weapons.copy();
-        quadWeapon = UnitTypes.quad.weapons.copy();
-        octWeapon = UnitTypes.oct.weapons.copy();
-
-        defaultFlareTime = ((UnitFactory) Blocks.airFactory).plans.get(0).time;
 
     }
 
