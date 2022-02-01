@@ -22,6 +22,7 @@ import mindustry.net.Net;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
+import mindustry.ui.fragments.HintsFragment;
 import mindustry.world.Block;
 import mindustry.world.Build;
 import mindustry.world.Tile;
@@ -48,6 +49,13 @@ public class PlagueMain extends Plugin {
 
     private final Rules rules = new Rules();
 
+    private Seq<Weapon> polyWeapons;
+    private Seq<Weapon> megaWeapon;
+    private Seq<Weapon> quadWeapon;
+    private Seq<Weapon> octWeapon;
+
+    private float defaultFlareTime;
+
     private HashMap<String, CustomPlayer> uuidMapping = new HashMap<>();
     private HashMap<Team, PlagueTeam> teams = new HashMap<>();
 
@@ -60,7 +68,7 @@ public class PlagueMain extends Plugin {
     private RTInterval corePlaceInterval = new RTInterval(20),
             tenMinInterval = new RTInterval(60  * 10);
 
-    private int winTime = 45; // In minutes
+    private int winTime = 3; // In minutes
 
     private float realTime = 0f;
     private int seconds = 0;
@@ -115,10 +123,10 @@ public class PlagueMain extends Plugin {
         netServer.admins.addActionFilter((action) -> {
 
             if(action.player != null && action.tile != null){
-                if(cartesianDistance(action.tile.x, action.tile.y,
+                /*if(cartesianDistance(action.tile.x, action.tile.y,
                         plagueCore[0], plagueCore[1]) < world.height()/4){
                     if(action.player.team() != plagueTeam) return false;
-                }
+                }*/
                 if(action.tile.block() == Blocks.powerSource){
                     return false;
                 }
@@ -161,9 +169,11 @@ public class PlagueMain extends Plugin {
                     if(teams.size() == 1){
                         endgame(new Seq<>());
                     }
+                    Call.sendMessage("[accent]The game has started! [green]Survivors[accent] must survive for [gold]" +
+                            winTime + "[accent] minutes to win!");
 
                 }else{
-                    Call.sendMessage("[accent]You have [scarlet]" + (120 - counts[0]*20) +
+                    Call.announce("[accent]You have [scarlet]" + (120 - counts[0]*20) +
                             " [accent]seconds left to place a core. Place any block to place a core.");
                 }
             }
@@ -172,6 +182,7 @@ public class PlagueMain extends Plugin {
             seconds = (int) (realTime / 1000);
 
             if(!gameover && !hasWon && seconds > winTime * 60){
+                hasWon = true;
                 Groups.player.each((player) -> {
                     if(player.team() == plagueTeam){
                         Call.infoMessage(player.con, "The survivors have evacuated all civilians and launched the inhibitors! " +
@@ -189,6 +200,17 @@ public class PlagueMain extends Plugin {
                     }
 
                 });
+
+                Call.sendMessage("[scarlet]The plague can now build and attack with air units!");
+                // BUFF DA PLAGUE (enable air)
+
+                UnitTypes.poly.weapons = polyWeapons;
+                UnitTypes.mega.weapons = megaWeapon;
+                UnitTypes.quad.weapons = quadWeapon;
+                UnitTypes.oct.weapons = octWeapon;
+
+                ((UnitFactory) Blocks.airFactory).plans.get(0).time = defaultFlareTime;
+
             }
 
             if(!gameover && !newRecord && seconds > mapRecord){
@@ -215,6 +237,7 @@ public class PlagueMain extends Plugin {
             cPly.player = event.player;
             cPly.rawName = event.player.name;
             cPly.xp = (int) entries.get("plagueXP");
+            cPly.wins = (int) entries.get("plagueWins");
             cPly.monthWins = (int) entries.get("plagueMonthWins");
 
             updatePlayer(event.player);
@@ -366,10 +389,15 @@ public class PlagueMain extends Plugin {
                 i += 1;
             }
 
-            currMap = Integer.parseInt(args[0]);
+            if(args.length > 0){
+                currMap = Integer.parseInt(args[0]);
+            }else{
+                currMap = Mathf.random(0, maps.customMaps().size-1);
+            }
+
 
             logic.reset();
-            mindustry.maps.Map map = maps.customMaps().get(currMap-1);
+            mindustry.maps.Map map = maps.customMaps().get(currMap);
             world.loadMap(map);
 
 
@@ -381,15 +409,12 @@ public class PlagueMain extends Plugin {
             plagueCore[0] = tile.x;
             plagueCore[1] = tile.y;
             world.beginMapLoad();
-            PlagueGenerator.inverseFloodFill(world.tiles, plagueCore[0], plagueCore[1]);
             PlagueGenerator.defaultOres(world.tiles);
             world.endMapLoad();
 
 
-
-
-
             Log.info("Map " + loadedMap.name() + " loaded");
+            rules.enemyCoreBuildRadius = loadedMap.rules().enemyCoreBuildRadius;
 
             state.rules = rules.copy();
             logic.play();
@@ -400,7 +425,7 @@ public class PlagueMain extends Plugin {
             mapID = loadedMap.file.name().split("_")[0];
             String[] keys = new String[]{"gamemode", "mapID"};
             Object[] vals = new Object[]{"plague", mapID};
-            if(!db.hasRow("midustry_map_data", keys, vals)){
+            if(!db.hasRow("mindustry_map_data", keys, vals)){
                 db.addEmptyRow("mindustry_map_data", keys, vals);
             }
             HashMap<String, Object> entries = db.loadRow("mindustry_map_data", keys, vals);
@@ -509,6 +534,7 @@ public class PlagueMain extends Plugin {
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
+
         UnitTypes.poly.weapons = new Seq<>();
         UnitTypes.mega.weapons = new Seq<>();
         UnitTypes.quad.weapons = new Seq<>();
@@ -521,14 +547,16 @@ public class PlagueMain extends Plugin {
         rules.fire = false;
         rules.modeName = "Plague";
 
-        ((UnitFactory) Blocks.airFactory).plans.get(0).unit = UnitTypes.mono;
         ((UnitFactory) Blocks.airFactory).plans.get(0).time = 129037f;
-        ((UnitFactory) Blocks.airFactory).plans.get(0).requirements = ItemStack.empty;
-        ((Reconstructor) Blocks.multiplicativeReconstructor).constructTime /= 2;
-        ((Reconstructor) Blocks.exponentialReconstructor).constructTime /= 2;
-        ((Reconstructor) Blocks.tetrativeReconstructor).constructTime /= 2;
 
         ((PowerSource) Blocks.powerSource).powerProduction = 696969f;
+
+        polyWeapons = UnitTypes.poly.weapons.copy();
+        megaWeapon = UnitTypes.mega.weapons.copy();
+        quadWeapon = UnitTypes.quad.weapons.copy();
+        octWeapon = UnitTypes.oct.weapons.copy();
+
+        defaultFlareTime = ((UnitFactory) Blocks.airFactory).plans.get(0).time;
 
     }
 
