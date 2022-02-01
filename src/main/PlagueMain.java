@@ -233,6 +233,7 @@ public class PlagueMain extends Plugin {
             }
             CustomPlayer cPly = uuidMapping.get(event.player.uuid());
             cPly.player = event.player;
+            cPly.team = cPly.player.team();
             cPly.rawName = event.player.name;
             cPly.xp = (int) entries.get("plagueXP");
             cPly.wins = (int) entries.get("plagueWins");
@@ -438,6 +439,7 @@ public class PlagueMain extends Plugin {
             tile.build.items.clear();
 
             teams.put(Team.purple, new PlagueTeam(Team.purple));
+            teams.put(Team.blue, new PlagueTeam(Team.blue));
         });
 
         handler.register("setxp", "<uuid> <xp>", "Set the xp of a player", args -> {
