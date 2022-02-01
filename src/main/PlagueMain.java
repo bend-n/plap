@@ -373,6 +373,18 @@ public class PlagueMain extends Plugin {
                 }
             }
         });
+
+        Events.on(EventType.CustomEvent.class, event ->{
+            if(event.value instanceof String[] && ((String[]) event.value)[0].equals("newName")){
+                String[] val = (String[]) event.value;
+                Player ply = uuidMapping.get(val[1]).player;
+                CustomPlayer cPly = uuidMapping.get(val[1]);
+                cPly.rawName = ply.name;
+                ply.name = StringHandler.determineRank(cPly.xp) + " " + ply.name;
+            }
+
+
+        });
     }
 
     @Override
