@@ -336,6 +336,10 @@ public class PlagueMain extends Plugin {
                 e.printStackTrace();
             }
 
+            if(event.team != Team.purple && event.tile.block() == Blocks.airFactory){
+                ((UnitFactory) event.tile.block()).plans.get(0).time = 129037f;
+            }
+
         });
 
 
