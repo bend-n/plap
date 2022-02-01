@@ -20,4 +20,6 @@ public class PlagueTeam {
 
     public void removePlayer(CustomPlayer ply) {players.remove(ply);}
 
+    public boolean hasPlayer(CustomPlayer ply) {return players.contains(ply);}
+
 }

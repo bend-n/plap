@@ -238,6 +238,10 @@ public class PlagueMain extends Plugin {
             cPly.wins = (int) entries.get("plagueWins");
             cPly.monthWins = (int) entries.get("plagueMonthWins");
 
+            if(!teams.get(cPly.team).hasPlayer(cPly)){
+                teams.get(cPly.team).addPlayer(cPly);
+            }
+
             updatePlayer(event.player);
 
             cPly.connected = true;
