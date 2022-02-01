@@ -106,7 +106,6 @@ public class PlagueMain extends Plugin {
 
         netServer.assigner = (player, players) -> {
             if(uuidMapping.containsKey(player.uuid())){
-                Log.info("MAPPED UUID FOUND");
                 Team team = uuidMapping.get(player.uuid()).team;
                 if(team == Team.blue && !pregame) return Team.purple;
                 return team;
