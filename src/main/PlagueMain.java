@@ -315,10 +315,10 @@ public class PlagueMain extends Plugin {
                 return;
             }
             try {
-                if(event.team == Team.purple && cartesianDistance(event.tile.x, event.tile.y,
+                /*if(event.team == Team.purple && cartesianDistance(event.tile.x, event.tile.y,
                         plagueCore[0], plagueCore[1]) < world.height()/4){
                     event.tile.build.indestructible = true;
-                }
+                }*/
             }catch(NullPointerException e){
                 e.printStackTrace();
             }
