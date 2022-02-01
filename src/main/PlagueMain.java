@@ -170,12 +170,14 @@ public class PlagueMain extends Plugin {
                     Call.sendMessage("[accent]The game has started! [green]Survivors[accent] must survive for [gold]" +
                             winTime + "[accent] minutes to win!");
 
+                    teams.remove(Team.blue);
+
                 }else{
                     Call.announce("[accent]You have [scarlet]" + (120 - counts[0]*20) +
                             " [accent]seconds left to place a core. Place any block to place a core.");
                 }
 
-                teams.remove(Team.blue);
+
             }
 
             realTime = System.currentTimeMillis() - startTime;
