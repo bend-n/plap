@@ -69,7 +69,7 @@ public class PlagueMain extends Plugin {
             tenMinInterval = new RTInterval(60 * 10),
             oneMinInterval = new RTInterval(60);
 
-    private int multiplier = 1;
+    private float multiplier = 1f;
     private static DecimalFormat df = new DecimalFormat("0.00");
 
     private int winTime = 45; // In minutes
@@ -232,11 +232,11 @@ public class PlagueMain extends Plugin {
             }
 
             if(tenMinInterval.get(seconds)) {
-                multiplier *= 1.5;
-                state.rules.unitDamageMultiplier *= 1.5;
+                multiplier *= 1.5f;
+                state.rules.unitDamageMultiplier *= 1.5f;
 
                 for (UnitType u : Vars.content.units()) {
-                    u.health *= 1.5;
+                    u.health *= 1.5f;
                 }
                 Call.sendMessage("[accent]Units now deal [scarlet]50%[accent] more damage and have [scarlet]50%[accent] more health " +
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
@@ -250,12 +250,6 @@ public class PlagueMain extends Plugin {
 
             });
 
-
-        Events.on(EventType.UnitCreateEvent.class, event ->{
-            if(event.unit.type == UnitTypes.flare && event.unit.team != Team.purple){
-                event.unit.health = 0;
-            }
-        });
 
         Events.on(EventType.PlayerJoinSecondary.class, event ->{
             if(!db.hasRow("mindustry_data", "uuid", event.player.uuid())){
@@ -611,6 +605,8 @@ public class PlagueMain extends Plugin {
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
 
+        UnitTypes.flare.weapons = new Seq<>();
+
         UnitTypes.poly.weapons = new Seq<>();
         UnitTypes.mega.weapons = new Seq<>();
         UnitTypes.quad.weapons = new Seq<>();
@@ -620,10 +616,16 @@ public class PlagueMain extends Plugin {
         UnitTypes.quad.payloadCapacity = 0f;
         UnitTypes.oct.payloadCapacity = 0f;
 
+        for (UnitType u : Vars.content.units()) {
+            u.crashDamageMultiplier = 0f;
+        }
+
+        rules.unitCapVariable = false;
         rules.fire = false;
         rules.modeName = "Plague";
 
-        ((UnitFactory) Blocks.airFactory).plans.get(0).time = 129037f;
+
+        ((Reconstructor) Blocks.additiveReconstructor).upgrades.remove(4);
 
         ((PowerSource) Blocks.powerSource).powerProduction = 696969f;
 
