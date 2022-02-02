@@ -243,9 +243,9 @@ public class PlagueMain extends Plugin {
             }
 
             if(oneMinInterval.get(seconds)){
-                Call.infoPopup(player.con, "[accent]Time survived: [orange]" + seconds/60 + "[accent] mins.\n" +
-                                "Record: [gold]" + mapRecord / 60 + "[accent] mins.",
-                        60, 20, 90, 0, 100, 0);
+                Call.infoPopup("[accent]Time survived: [orange]" + seconds/60 + "[accent] mins.\n" +
+                                "All-time map record: [gold]" + mapRecord / 60 + "[accent] mins.",
+                        60, 10, 120, 0, 140, 0);
             }
 
             });
@@ -290,7 +290,7 @@ public class PlagueMain extends Plugin {
             event.player.sendMessage(leaderboardString);
 
             Call.infoPopup(event.player.con, "[accent]Time survived: [orange]" + seconds/60 + "[accent] mins.\n" +
-                            "Record: [gold]" + mapRecord / 60 + "[accent] mins.",
+                            "All-time map record: [gold]" + mapRecord / 60 + "[accent] mins.",
                     60, 10, 120, 0, 140, 0);
         });
 
