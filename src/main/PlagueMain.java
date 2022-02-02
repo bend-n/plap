@@ -66,7 +66,8 @@ public class PlagueMain extends Plugin {
     }};
 
     private RTInterval corePlaceInterval = new RTInterval(20),
-        tenMinInterval = new RTInterval(60 * 10);
+            tenMinInterval = new RTInterval(60 * 10),
+            oneMinInterval = new RTInterval(60);
 
     private int multiplier = 1;
     private static DecimalFormat df = new DecimalFormat("0.00");
@@ -225,7 +226,9 @@ public class PlagueMain extends Plugin {
 
             if(!gameover && !newRecord && seconds > mapRecord){
                 newRecord = true;
-                Call.sendMessage("[gold]New record![accent]Old record of[gold]" + mapRecord + "[accent]was beaten!");
+                Call.sendMessage("[gold]New record![accent] Old record of[gold] "
+                        + mapRecord/60 + "[accent] minutes and [gold]" + mapRecord % 60 + "[accent] seconds"
+                        + "[accent] was beaten!");
             }
 
             if(tenMinInterval.get(seconds)) {
@@ -237,6 +240,12 @@ public class PlagueMain extends Plugin {
                 }
                 Call.sendMessage("[accent]Units now deal [scarlet]50%[accent] more damage and have [scarlet]50%[accent] more health " +
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
+            }
+
+            if(oneMinInterval.get(seconds)){
+                Call.infoPopup(player.con, "[accent]Time survived: [orange]" + seconds/60 + "[accent] mins.\n" +
+                                "Record: [gold]" + mapRecord / 60 + "[accent] mins.",
+                        60, 20, 90, 0, 100, 0);
             }
 
             });
@@ -279,6 +288,10 @@ public class PlagueMain extends Plugin {
             }
 
             event.player.sendMessage(leaderboardString);
+
+            Call.infoPopup(event.player.con, "[accent]Time survived: [orange]" + seconds/60 + "[accent] mins.\n" +
+                            "Record: [gold]" + mapRecord / 60 + "[accent] mins.",
+                    60, 10, 120, 0, 140, 0);
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
@@ -451,9 +464,9 @@ public class PlagueMain extends Plugin {
             state.teams.cores(Team.purple).each(coreBuild -> coreBuild.indestructible = true);
             for(int x = 0; x < world.width(); x++){
                 for(int y = 0; y < world.height(); y++){
-                    Tile _ = world.tile(x, y);
-                    if(_.build != null && _.build.block.equals(Blocks.powerSource)){
-                        _.build.indestructible = true;
+                    Tile t = world.tile(x, y);
+                    if(t.build != null && t.build.block.equals(Blocks.powerSource)){
+                        t.build.indestructible = true;
                     }
                 }
             }
