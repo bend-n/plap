@@ -232,14 +232,14 @@ public class PlagueMain extends Plugin {
             }
 
             if(tenMinInterval.get(seconds)) {
-                float multiplyBy = hasWon ? 1.8f : 1.2f;
+                float multiplyBy = hasWon ? 1.4f : 1.2f;
                 multiplier *= multiplyBy;
                 state.rules.unitDamageMultiplier *= multiplyBy;
 
                 for (UnitType u : Vars.content.units()) {
                     u.health *= multiplyBy;
                 }
-                String percent = "" + (multiplyBy-1)*100;
+                String percent = "" + (int) ((multiplyBy-1)*100);
                 Call.sendMessage("[accent]Units now deal [scarlet]" + percent + "%[accent] more damage and have " +
                         "[scarlet]" + percent + "%[accent] more health " +
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
@@ -624,6 +624,7 @@ public class PlagueMain extends Plugin {
         }
 
         rules.unitCapVariable = false;
+        rules.unitCap = 64;
         rules.fire = false;
         rules.modeName = "Plague";
 
