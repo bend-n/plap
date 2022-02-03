@@ -54,6 +54,8 @@ public class PlagueMain extends Plugin {
     private Seq<Weapon> quadWeapon;
     private Seq<Weapon> octWeapon;
 
+    private UnitType[] additiveFlare;
+
     private float defaultFlareTime;
 
     private HashMap<String, CustomPlayer> uuidMapping = new HashMap<>();
@@ -205,7 +207,7 @@ public class PlagueMain extends Plugin {
                         cPly.monthWins++;
                         cPly.wins++;
                         player.sendMessage("[gold]+1 wins[accent] for a total of [gold]" + cPly.monthWins + "[accent] wins!");
-                        int addXp = 500 * (cPly.player.donatorLevel + 1);
+                        int addXp = 750 * (cPly.player.donatorLevel + 1);
                         cPly.xp += addXp;
                         cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for winning");
                     }
@@ -221,6 +223,8 @@ public class PlagueMain extends Plugin {
                 UnitTypes.oct.weapons = octWeapon;
 
                 ((UnitFactory) Blocks.airFactory).plans.get(0).time = defaultFlareTime;
+
+                ((Reconstructor) Blocks.additiveReconstructor).upgrades.add(additiveFlare);
 
             }
 
@@ -281,7 +285,6 @@ public class PlagueMain extends Plugin {
             updatePlayer(event.player);
 
             cPly.connected = true;
-
 
 
 
@@ -435,7 +438,7 @@ public class PlagueMain extends Plugin {
             }
 
             prefs = Preferences.userRoot().node(this.getClass().getName());
-            currMap = prefs.getInt("mapchoice",0);
+            int lastMap = prefs.getInt("mapchoice",0);
             int i = 0;
             for(mindustry.maps.Map map : maps.customMaps()){
                 Log.info(i + ": " + map.name());
@@ -445,6 +448,7 @@ public class PlagueMain extends Plugin {
             if(args.length > 0){
                 currMap = Integer.parseInt(args[0]);
             }else{
+                currMap = PlagueData.getRandomWithExclusion(0, maps.customMaps().size-1, lastMap);
                 currMap = Mathf.random(0, maps.customMaps().size-1);
             }
 
@@ -628,8 +632,8 @@ public class PlagueMain extends Plugin {
         rules.fire = false;
         rules.modeName = "Plague";
 
-
-        ((Reconstructor) Blocks.additiveReconstructor).upgrades.remove(4);
+        additiveFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades.get(3);
+        ((Reconstructor) Blocks.additiveReconstructor).upgrades.remove(3);
 
         ((PowerSource) Blocks.powerSource).powerProduction = 696969f;
 
@@ -745,7 +749,7 @@ public class PlagueMain extends Plugin {
             cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for surviving the longest");
             cPly.xp += addXp;
             if(newRecord){
-                addXp = 1000 * (cPly.player.donatorLevel + 1);
+                addXp = 2000 * (cPly.player.donatorLevel + 1);
                 cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for setting a record");
                 cPly.xp += addXp;
             }
