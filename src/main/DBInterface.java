@@ -1,5 +1,6 @@
 package main;
 
+import arc.util.Log;
 import arc.util.Time;
 
 import java.sql.*;
@@ -19,7 +20,7 @@ public class DBInterface {
             conn = DriverManager.getConnection(url, username, password);
             System.out.println("Connected to database successfully");
         } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+            Log.err(e);
         }
     }
 
@@ -41,7 +42,7 @@ public class DBInterface {
             ResultSet rs = preparedStatement.executeQuery();
             return rs.last();
         } catch (SQLException e) {
-            System.out.println("SQL ERROR: " + e);
+            Log.err(e);
         }
         return false;
     }
@@ -66,7 +67,7 @@ public class DBInterface {
             }
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.err(e);
         }
     }
 
@@ -97,7 +98,7 @@ public class DBInterface {
             }
             rs.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.err(e);
         }
 
         return returnedVals;
@@ -135,7 +136,7 @@ public class DBInterface {
             }
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.err(e);
         }
 
 
@@ -145,7 +146,7 @@ public class DBInterface {
         try {
             return conn.prepareStatement(query).executeQuery();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.err(e);
         }
         return null;
     }
@@ -156,7 +157,7 @@ public class DBInterface {
             stmt.executeUpdate(update);
             stmt.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.err(e);
         }
     }
 
@@ -170,7 +171,7 @@ public class DBInterface {
             preparedStatement.setObject(1, value);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.err(e);
         }
     }
 }
