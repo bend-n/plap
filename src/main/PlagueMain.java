@@ -49,8 +49,9 @@ import static mindustry.Vars.*;
 public class PlagueMain extends Plugin {
 
     private boolean firstRun = true;
+    private boolean resetting = false;
 
-    private int teamsCount = 0;
+    private int teamsCount;
 
     private final Rules rules = new Rules();
 
@@ -58,6 +59,8 @@ public class PlagueMain extends Plugin {
     private Seq<Weapon> megaWeapon;
     private Seq<Weapon> quadWeapon;
     private Seq<Weapon> octWeapon;
+
+    private HashMap<UnitType, Float> origonalUnitHealth = new HashMap<>();
 
     private Seq<UnitType[]> additiveFlare;
     private Seq<UnitType[]> additiveNoFlare;
@@ -71,20 +74,21 @@ public class PlagueMain extends Plugin {
         put(Team.blue, "[royal]");
     }};
 
-    private int pretime = 2;
+    private int pretime = 6;
 
     private RTInterval corePlaceInterval = new RTInterval(20),
             tenMinInterval = new RTInterval(60 * 10),
             oneMinInterval = new RTInterval(60);
 
-    private float multiplier = 1f;
+    private float multiplier;
     private static DecimalFormat df = new DecimalFormat("0.00");
 
     private int winTime = 45; // In minutes
 
     private float realTime = 0f;
-    private int seconds = 0;
-    private boolean newRecord = false;
+    private int seconds;
+    private static long startTime;
+    private boolean newRecord;
 
     private int[] plagueCore = new int[2];
 
@@ -106,8 +110,6 @@ public class PlagueMain extends Plugin {
     private boolean pregame;
     private boolean gameover;
     private boolean hasWon;
-
-    private static long startTime = System.currentTimeMillis();
 
     public int counts;
 
@@ -159,6 +161,7 @@ public class PlagueMain extends Plugin {
 
 
         Events.on(EventType.Trigger.class, event ->{
+            if(resetting || firstRun) return;
             // Spawn player in core if they aren't
             if(pregame){
                 for(Player player : Groups.player){
@@ -167,9 +170,9 @@ public class PlagueMain extends Plugin {
                     }
                 }
             }
-
             // Notification about placing a core, then starting game
             if(counts < pretime && corePlaceInterval.get(seconds)){
+
                 counts ++;
                 if(counts == pretime){
                     pregame = false;
@@ -181,6 +184,7 @@ public class PlagueMain extends Plugin {
                     }
 
                     teams.remove(Team.blue);
+                    Log.info("No survs endgame, Count: " + counts);
                     if(teams.size() == 1){
                         endgame(new Seq<>());
                     }else{
@@ -192,7 +196,7 @@ public class PlagueMain extends Plugin {
 
 
                 }else{
-                    Call.announce("[accent]You have [scarlet]" + (pretime*20 - counts*20) +
+                    Call.sendMessage("[accent]You have [scarlet]" + (pretime*20 - counts*20) +
                             " [accent]seconds left to place a core. Place any block to place a core.");
                 }
 
@@ -244,12 +248,12 @@ public class PlagueMain extends Plugin {
             if(tenMinInterval.get(seconds)) {
                 float multiplyBy = hasWon ? 1.4f : 1.2f;
                 multiplier *= multiplyBy;
-                state.rules.unitDamageMultiplier *= multiplyBy;
+                state.rules.unitDamageMultiplier *= multiplier;
 
                 for (UnitType u : Vars.content.units()) {
-                    u.health *= multiplyBy;
+                    u.health = origonalUnitHealth.get(u) * multiplier;
                 }
-                String percent = "" + (int) ((multiplyBy-1)*100);
+                String percent = "" + Math.round((multiplyBy-1)*100);
                 Call.sendMessage("[accent]Units now deal [scarlet]" + percent + "%[accent] more damage and have " +
                         "[scarlet]" + percent + "%[accent] more health " +
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
@@ -271,7 +275,8 @@ public class PlagueMain extends Plugin {
 
             savePlayerData(event.player.uuid());
 
-
+            CustomPlayer cPly = uuidMapping.get(event.player.uuid());
+            cPly.connected = false;
         });
 
         Events.on(EventType.BuildSelectEvent.class, event ->{
@@ -363,6 +368,7 @@ public class PlagueMain extends Plugin {
 
                 teams.remove(deadTeam);
                 if(teams.size() == 1){
+                    Log.info("Dead block endgame");
                     endgame(winners);
                 }
             }
@@ -517,10 +523,14 @@ public class PlagueMain extends Plugin {
         rules.fire = false;
         rules.modeName = "Plague";
 
-        additiveFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades;
+        for (UnitType u : Vars.content.units()) {
+            origonalUnitHealth.put(u, u.health);
+        }
+
+        additiveFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades.copy();
         ((Reconstructor) Blocks.additiveReconstructor).upgrades.remove(3);
 
-        additiveNoFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades;
+        additiveNoFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades.copy();
     }
 
     void resetRules(){
@@ -673,6 +683,8 @@ public class PlagueMain extends Plugin {
 
     void endgame(Seq<CustomPlayer> winners){
 
+        Log.info("---- ENDING GAME ----");
+
         gameover = true;
 
         String[] keys = new String[]{"gamemode", "mapID"};
@@ -714,7 +726,10 @@ public class PlagueMain extends Plugin {
             survivorRecord = seconds;
         }
 
-        state.gameOver = true;
+
+        for(Player player : Groups.player){
+            savePlayerData(player.uuid());
+        }
 
 
         int finalSurvivorRecord = survivorRecord;
@@ -726,6 +741,7 @@ public class PlagueMain extends Plugin {
                     new String[]{"survivorRecord", "avgSurvived", "plays"},
                     new Object[]{finalSurvivorRecord, finalAvgSurvived, finalPlays});
 
+            Events.fire(new EventType.GameOverEvent(Team.purple));
 
             Log.info("Game ended successfully.");
             mapReset();
@@ -779,7 +795,7 @@ public class PlagueMain extends Plugin {
     }
 
     void mapReset(String[] args){
-
+        resetting = true;
 
         for(String uuid : uuidMapping.keySet()){
             if(!uuidMapping.get(uuid).connected){
@@ -788,17 +804,31 @@ public class PlagueMain extends Plugin {
         }
         teams = new HashMap<>();
 
+        teamsCount = 0;
+
+        multiplier = 1f;
+
+        seconds = 0;
+        startTime = System.currentTimeMillis();
+
+        newRecord = false;
+
+        counts = 0;
         pregame = true;
         gameover = false;
         hasWon = false;
 
         resetRules();
         leaderboardString = _leaderboardInit(5);
-        counts = 0;
+
+        corePlaceInterval.reset();
+        tenMinInterval.reset();
+        oneMinInterval.reset();
+
 
         // Load new map:
         loadMap(args);
-
+        resetting = false;
     }
 
 

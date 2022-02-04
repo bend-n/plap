@@ -16,4 +16,8 @@ public class RTInterval {
         return false;
     }
 
+    public void reset(){
+        quotient = 0;
+    }
+
 }
