@@ -53,7 +53,7 @@ public class PlagueData {
         survivorBanned = ObjectSet.with(Blocks.commandCenter, Blocks.groundFactory, Blocks.navalFactory,
                 Blocks.tetrativeReconstructor, Blocks.phaseWall, Blocks.phaseWallLarge,
                 Blocks.logicDisplay, Blocks.largeLogicDisplay, // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor,
-                Blocks.additiveReconstructor, Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor,
+                Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor,
                 Blocks.tetrativeReconstructor);
     }
 

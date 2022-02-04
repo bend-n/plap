@@ -267,6 +267,15 @@ public class PlagueMain extends Plugin {
 
             });
 
+        Events.on(EventType.UnitCreateEvent.class, event -> {
+            if(event.unit.type == UnitTypes.horizon && event.unit.team != Team.purple) {
+                // Let players know they got resources
+                Call.label("Survivors can't build horizons!",
+                        5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
+                event.unit.health = 0;
+            }
+        });
+
         Events.on(EventType.PlayerJoinSecondary.class, event ->{
             loadPlayer(event.player);
         });
@@ -509,10 +518,10 @@ public class PlagueMain extends Plugin {
         UnitTypes.quad.payloadCapacity = 0f;
         UnitTypes.oct.payloadCapacity = 0f;
 
-        UnitTypes.nova.canBoost = false;
+        /*UnitTypes.nova.canBoost = false;
         UnitTypes.pulsar.canBoost = false;
         UnitTypes.quasar.canBoost = false;
-        UnitTypes.vela.canBoost = false;
+        UnitTypes.vela.canBoost = false;*/
 
         for (UnitType u : Vars.content.units()) {
             u.crashDamageMultiplier = 0f;
@@ -741,7 +750,7 @@ public class PlagueMain extends Plugin {
                     new String[]{"survivorRecord", "avgSurvived", "plays"},
                     new Object[]{finalSurvivorRecord, finalAvgSurvived, finalPlays});
 
-            Events.fire(new EventType.GameOverEvent(Team.purple));
+            Events.fire(new EventType.CustomEvent("GameOver"));
 
             Log.info("Game ended successfully.");
             mapReset();
