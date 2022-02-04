@@ -229,7 +229,7 @@ public class PlagueMain extends Plugin {
                 Call.sendMessage("[scarlet]The plague can now build and attack with air units!");
                 // BUFF DA PLAGUE (enable air)
 
-                UnitTypes.poly.weapons = polyWeapons;
+                // UnitTypes.poly.weapons = polyWeapons; So survivor polys can't do damage
                 UnitTypes.mega.weapons = megaWeapon;
                 UnitTypes.quad.weapons = quadWeapon;
                 UnitTypes.oct.weapons = octWeapon;
@@ -269,10 +269,11 @@ public class PlagueMain extends Plugin {
 
         Events.on(EventType.UnitCreateEvent.class, event -> {
             if(event.unit.type == UnitTypes.horizon && event.unit.team != Team.purple) {
-                // Let players know they got resources
+                // Let players know they can't build this unit
                 Call.label("Survivors can't build horizons!",
                         5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
                 event.unit.health = 0;
+                event.unit.dead = true;
             }
         });
 
@@ -313,7 +314,7 @@ public class PlagueMain extends Plugin {
                     if(chosenTeam == null){
                         teamsCount++;
                         chosenTeam = Team.all[teamsCount+6];
-                        teams.put(chosenTeam, new PlagueTeam(event.team));
+                        teams.put(chosenTeam, new PlagueTeam(event.team, uuidMapping.get(player.uuid())));
                     }
 
                     teams.get(chosenTeam).addPlayer(uuidMapping.get(player.uuid()));
@@ -806,7 +807,10 @@ public class PlagueMain extends Plugin {
     void mapReset(String[] args){
         resetting = true;
 
-        for(String uuid : uuidMapping.keySet()){
+        Iterator<String> it = uuidMapping.keySet().iterator();
+
+        while(it.hasNext()){
+            String uuid = it.next();
             if(!uuidMapping.get(uuid).connected){
                 uuidMapping.remove(uuid);
             }
