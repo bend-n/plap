@@ -302,6 +302,13 @@ public class PlagueMain extends Plugin {
                             for(CoreBlock.CoreBuild core : t.cores){
                                 if(cartesianDistance(event.tile.x, event.tile.y, core.tile.x, core.tile.y) < 150){
                                     chosenTeam = t.team;
+                                    if(teams.get(chosenTeam).locked){
+                                        player.sendMessage("[accent]This team is locked, you cannot join it!");
+                                        return;
+                                    }else if (teams.get(chosenTeam).blacklistedPlayers.contains(player.uuid())){
+                                        player.sendMessage("[accent]You have been blacklisted from this team!");
+                                        return;
+                                    }
                                     break;
                                 }
                             }
@@ -314,12 +321,13 @@ public class PlagueMain extends Plugin {
                     if(chosenTeam == null){
                         teamsCount++;
                         chosenTeam = Team.all[teamsCount+6];
-                        teams.put(chosenTeam, new PlagueTeam(event.team, uuidMapping.get(player.uuid())));
+                        teams.put(chosenTeam, new PlagueTeam(chosenTeam, uuidMapping.get(player.uuid())));
                     }
 
                     teams.get(chosenTeam).addPlayer(uuidMapping.get(player.uuid()));
 
                     player.team(chosenTeam);
+                    uuidMapping.get(player.uuid()).team = chosenTeam;
                     updatePlayer(player);
 
                     event.tile.setNet(Blocks.coreFoundation, chosenTeam, 0);
@@ -500,6 +508,118 @@ public class PlagueMain extends Plugin {
                     "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
                     " allowed to choose your team. Place any block to place a core at the start of the game.\n\n" +
                     "Air factories are only able to make monos, and all air units do no damage.");
+        });
+
+        handler.<Player>register("teamlock", "Toggles locking team, preventing other players from joining your team (leader only)", (args, player) -> {
+            if(player.team() == Team.blue || player.team() == Team.purple){
+                player.sendMessage(("[accent]You can only lock a team as a survivor!"));
+                return;
+            }
+
+            CustomPlayer cPly = uuidMapping.get(player.uuid());
+            PlagueTeam pTeam = teams.get(cPly.team);
+
+            Log.info(pTeam.leader);
+            if(!pTeam.leader.player.uuid().equals(cPly.player.uuid())){
+                player.sendMessage("[accent]You must be team leader to lock the team!");
+                return;
+            }
+
+            if(pTeam.locked){
+                pTeam.locked = false;
+                player.sendMessage("[accent]Team is [scarlet]no longer locked[accent], other players can now join!");
+            }else{
+                pTeam.locked = true;
+                player.sendMessage("[accent]Team is [scarlet]now locked[accent], no one else can join!");
+            }
+
+
+
+        });
+
+        handler.<Player>register("teamkick", "[id/name]", "Kick a player from your team (leader only)", (args, player) -> {
+            if(!pregame){
+                player.sendMessage("[accent]Cannot kick players after the game has begun!");
+                return;
+            }
+
+            if(player.team() == Team.blue || player.team() == Team.purple){
+                player.sendMessage(("[accent]You can only kick players from a team as a survivor!"));
+                return;
+            }
+
+            CustomPlayer cPly = uuidMapping.get(player.uuid());
+            PlagueTeam pTeam = teams.get(cPly.team);
+
+
+            if(pTeam.leader.player.uuid() != cPly.player.uuid()){
+                player.sendMessage("[accent]You must be team leader to kick players!");
+                return;
+            }
+
+            Player plyToKick;
+            if(args.length != 0){
+                for(CustomPlayer other : pTeam.players){
+                    if(("" + other.player.id()).equals(args[0]) ||
+                            other.player.name.equalsIgnoreCase(args[0]) ||
+                            other.rawName.equalsIgnoreCase(args[0])){
+                        if(other.player == player) continue;
+                        other.team = Team.blue;
+                        other.player.team(Team.blue);
+                        other.player.sendMessage(("[accent]You have been kicked from the team!"));
+                        pTeam.blacklistedPlayers.add(other.player.uuid());
+                        pTeam.removePlayer(other);
+                        return;
+                    }
+                }
+            }
+
+            String s = "[accent]Invalid syntax!\n\n" +
+                    "You can kick the following players:\n";
+            for(CustomPlayer other : pTeam.players){
+                if(other.player == player) continue;
+                s += "[gold] - [accent]ID: [scarlet]" + other.player.id + "[accent]: [white]" + other.rawName + "\n";
+            }
+            s += "\n\nYou must specify a player [blue]name/id[accent]: [scarlet]/teamkick [blue]44";
+
+            player.sendMessage(s);
+            return;
+
+
+        });
+
+        handler.<Player>register("teamleave", "Leave your current team", (args, player) -> {
+            if(player.team() == Team.blue || player.team() == Team.purple){
+                player.sendMessage(("[accent]Can only leave team if you are survivor!"));
+                return;
+            }
+
+            if(!pregame){
+                CustomPlayer cPly = uuidMapping.get(player.uuid());
+                infect(cPly, true);
+                return;
+            }
+
+            CustomPlayer cPly = uuidMapping.get(player.uuid());
+            PlagueTeam pTeam = teams.get(cPly.team);
+
+
+            cPly.team = Team.blue;
+            cPly.player.team(Team.blue);
+            cPly.player.sendMessage(("[accent]You have left the team!"));
+            pTeam.removePlayer(cPly);
+            if(pTeam.players.size() == 0){
+                pTeam.locked = true;
+                killTiles(pTeam.team);
+                return;
+            }
+
+            if(pTeam.leader.player.uuid().equals(player.uuid())){
+                pTeam.leader = pTeam.players.get(0);
+                pTeam.leader.player.sendMessage("[accent]The previous team leader left making you the new leader!");
+            }
+
+
         });
     }
 
@@ -807,14 +927,7 @@ public class PlagueMain extends Plugin {
     void mapReset(String[] args){
         resetting = true;
 
-        Iterator<String> it = uuidMapping.keySet().iterator();
-
-        while(it.hasNext()){
-            String uuid = it.next();
-            if(!uuidMapping.get(uuid).connected){
-                uuidMapping.remove(uuid);
-            }
-        }
+        uuidMapping.keySet().removeIf(uuid -> !uuidMapping.get(uuid).connected);
         teams = new HashMap<>();
 
         teamsCount = 0;
