@@ -262,9 +262,13 @@ public class PlagueMain extends Plugin {
             }
 
             if(oneMinInterval.get(seconds)){
-                Call.infoPopup("[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
-                                "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.",
-                        60, 10, 120, 0, 140, 0);
+                for(Player ply : Groups.player){
+                    CustomPlayer cPly = uuidMapping.get(ply.uuid());
+                    if(cPly.hudEnabled) Call.infoPopup(ply.con, "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
+                                    "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.",
+                            60, 10, 120, 0, 140, 0);
+                }
+
             }
 
             });
@@ -409,6 +413,10 @@ public class PlagueMain extends Plugin {
                 CustomPlayer cPly = uuidMapping.get(val[1]);
                 cPly.rawName = ply.name;
                 ply.name = StringHandler.determineRank(cPly.xp) + " " + ply.name;
+            } else if(event.value instanceof String[] && ((String[]) event.value)[0].equals("hudToggle")){
+                String[] val = (String[]) event.value;
+                CustomPlayer cPly = uuidMapping.get(val[1]);
+                cPly.hudEnabled = !cPly.hudEnabled;
             }
 
 
@@ -629,6 +637,7 @@ public class PlagueMain extends Plugin {
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
         rules.buildSpeedMultiplier = 4;
+        rules.coreIncinerates = true;
 
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
@@ -748,6 +757,7 @@ public class PlagueMain extends Plugin {
         cPly.xp = (int) entries.get("plagueXP");
         cPly.wins = (int) entries.get("plagueWins");
         cPly.monthWins = (int) entries.get("plagueMonthWins");
+        cPly.hudEnabled = (boolean) entries.get("hudOn");
 
         if(!teams.get(cPly.team).hasPlayer(cPly)){
             teams.get(cPly.team).addPlayer(cPly);
@@ -766,7 +776,7 @@ public class PlagueMain extends Plugin {
 
         player.sendMessage(leaderboardString);
 
-        Call.infoPopup(player.con, "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
+        if(cPly.hudEnabled) Call.infoPopup(player.con, "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
                         "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.",
                 60, 10, 120, 0, 140, 0);
     }

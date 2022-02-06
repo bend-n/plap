@@ -12,6 +12,7 @@ public class CustomPlayer {
     public int xp;
     public int monthWins;
     public int wins;
+    public boolean hudEnabled = true;
 
     public boolean connected = true;
 
