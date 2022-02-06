@@ -248,10 +248,12 @@ public class PlagueMain extends Plugin {
             if(tenMinInterval.get(seconds)) {
                 float multiplyBy = hasWon ? 1.4f : 1.2f;
                 multiplier *= multiplyBy;
-                state.rules.unitDamageMultiplier *= multiplier;
+                state.rules.unitDamageMultiplier = multiplier;
 
                 for (UnitType u : Vars.content.units()) {
-                    u.health = origonalUnitHealth.get(u) * multiplier;
+                    if(u != UnitTypes.alpha && u != UnitTypes.beta && u != UnitTypes.gamma){
+                        u.health = origonalUnitHealth.get(u) * multiplier;
+                    }
                 }
                 String percent = "" + Math.round((multiplyBy-1)*100);
                 Call.sendMessage("[accent]Units now deal [scarlet]" + percent + "%[accent] more damage and have " +
@@ -300,7 +302,7 @@ public class PlagueMain extends Plugin {
                     for(Teams.TeamData t : state.teams.getActive()){
                         if(t.team != Team.purple){
                             for(CoreBlock.CoreBuild core : t.cores){
-                                if(cartesianDistance(event.tile.x, event.tile.y, core.tile.x, core.tile.y) < 150){
+                                if(cartesianDistance(event.tile.x, event.tile.y, core.tile.x, core.tile.y) < 100){
                                     chosenTeam = t.team;
                                     if(teams.get(chosenTeam).locked){
                                         player.sendMessage("[accent]This team is locked, you cannot join it!");
@@ -628,6 +630,14 @@ public class PlagueMain extends Plugin {
         // rules.playerDamageMultiplier = 0;
         rules.buildSpeedMultiplier = 4;
 
+        UnitTypes.alpha.weapons = new Seq<>();
+        UnitTypes.beta.weapons = new Seq<>();
+        UnitTypes.gamma.weapons = new Seq<>();
+
+        UnitTypes.alpha.health = 1f;
+        UnitTypes.beta.health = 1f;
+        UnitTypes.gamma.health = 1f;
+
         polyWeapons = UnitTypes.poly.weapons.copy();
         megaWeapon = UnitTypes.mega.weapons.copy();
         quadWeapon = UnitTypes.quad.weapons.copy();
@@ -638,11 +648,6 @@ public class PlagueMain extends Plugin {
         UnitTypes.mega.payloadCapacity = 0f;
         UnitTypes.quad.payloadCapacity = 0f;
         UnitTypes.oct.payloadCapacity = 0f;
-
-        /*UnitTypes.nova.canBoost = false;
-        UnitTypes.pulsar.canBoost = false;
-        UnitTypes.quasar.canBoost = false;
-        UnitTypes.vela.canBoost = false;*/
 
         for (UnitType u : Vars.content.units()) {
             u.crashDamageMultiplier = 0f;
@@ -664,10 +669,6 @@ public class PlagueMain extends Plugin {
     }
 
     void resetRules(){
-
-        UnitTypes.alpha.weapons = new Seq<>();
-        UnitTypes.beta.weapons = new Seq<>();
-        UnitTypes.gamma.weapons = new Seq<>();
 
         UnitTypes.poly.weapons = new Seq<>();
         UnitTypes.mega.weapons = new Seq<>();
