@@ -119,7 +119,6 @@ public class PlagueGenerator{
         ores.each(o -> ((OreFilter) o).threshold -= 0.05f);
         ores.insert(0, new OreFilter() {{
             ore = Blocks.oreScrap;
-            scl += 2 / 2.1F;
         }});
 
         in.floor = (Floor) Blocks.darksand;

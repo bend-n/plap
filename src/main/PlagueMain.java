@@ -509,6 +509,15 @@ public class PlagueMain extends Plugin {
             player.sendMessage(leaderboardString);
         });
 
+        handler.<Player>register("rules", "Display the rules", (args, player) -> {
+            player.sendMessage("[accent] Basic rules (these are on top of the obvious ones like no griefing, racial slurs etc):\n\n" +
+                    "[gold] - [scarlet]No[accent] survivor PVP. Do not attack other survivors as a survivor\n" +
+                    "[gold] - [scarlet]No[accent] malicious cores. Do not place a core inside someone elses base on purpose\n" +
+                    "[gold] - [scarlet]Don't[accent] waste resources on useless or uneeded schematics\n" +
+                    "[gold] - [accent]If you go afk, don't build up your defenses, or place a core behind another team to try" +
+                    " and get them to build a defense for you, it is likely an admin with /destroy your core.");
+        });
+
         handler.<Player>register("info", "Display info about the current game", (args, player) -> {
             player.sendMessage("[#4d004d]{[purple]AA[#4d004d]} [olive]Plague[accent] is a survival game mode with two teams," +
                     " the [scarlet]Plague [accent]and [green]Survivors[accent].\n\n" +
@@ -548,10 +557,6 @@ public class PlagueMain extends Plugin {
         });
 
         handler.<Player>register("teamkick", "[id/name]", "Kick a player from your team (leader only)", (args, player) -> {
-            if(!pregame){
-                player.sendMessage("[accent]Cannot kick players after the game has begun!");
-                return;
-            }
 
             if(player.team() == Team.blue || player.team() == Team.purple){
                 player.sendMessage(("[accent]You can only kick players from a team as a survivor!"));
