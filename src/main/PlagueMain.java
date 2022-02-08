@@ -306,7 +306,7 @@ public class PlagueMain extends Plugin {
                     for(Teams.TeamData t : state.teams.getActive()){
                         if(t.team != Team.purple){
                             for(CoreBlock.CoreBuild core : t.cores){
-                                if(cartesianDistance(event.tile.x, event.tile.y, core.tile.x, core.tile.y) < 100){
+                                if(cartesianDistance(event.tile.x, event.tile.y, core.tile.x, core.tile.y) < 150){
                                     chosenTeam = t.team;
                                     if(teams.get(chosenTeam).locked){
                                         player.sendMessage("[accent]This team is locked, you cannot join it!");
@@ -668,7 +668,7 @@ public class PlagueMain extends Plugin {
         }
 
         rules.unitCapVariable = false;
-        rules.unitCap = 64;
+        rules.unitCap = 48;
         rules.fire = false;
         rules.modeName = "Plague";
 
@@ -763,10 +763,17 @@ public class PlagueMain extends Plugin {
         cPly.wins = (int) entries.get("plagueWins");
         cPly.monthWins = (int) entries.get("plagueMonthWins");
         cPly.hudEnabled = (boolean) entries.get("hudOn");
-
-        if(!teams.get(cPly.team).hasPlayer(cPly)){
-            teams.get(cPly.team).addPlayer(cPly);
+        try{
+            if(!teams.get(cPly.team).hasPlayer(cPly)){
+                teams.get(cPly.team).addPlayer(cPly);
+            }
+        }catch (NullPointerException e){
+            Log.err("Teams null pointer exception.\n" +
+                    "Player team: " + player.team() + "\n" +
+                    "Custom Player team: " + cPly.team + "\n" +
+                    "Error: " + e);
         }
+
 
         updatePlayer(player);
 

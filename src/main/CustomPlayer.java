@@ -20,4 +20,8 @@ public class CustomPlayer {
         this.player = player;
         this.rawName = player.name;
     }
+
+    public void addXP(int add){
+        xp += add;
+    }
 }
