@@ -9,8 +9,13 @@ public class StringHandler {
             case 3: return "[accent]<[white]\uF858" + ((xp / 5000) % 3 + 1) + "[accent]>";
             case 4: return "[accent]<[white]\uF857" + ((xp / 5000) % 3 + 1) + "[accent]>";
             case 5: return "[accent]<[white]\uF856" + ((xp / 5000) % 3 + 1) + "[accent]>";
-            case 6: return "[accent]<[gold]\uF85F" + ((xp / 5000) % 3 + 1) + "[accent]>";
+            case 6: return "[accent]<[white]\uF7BE" + ((xp / 5000) % 3 + 1) + "[accent]>";
+            case 7: return "[accent]<[gold]\uF85F" + ((xp / 5000) % 3 + 1) + "[accent]>";
         }
         return "[accent]<[green]Horde slayer[accent]>[white]";
+    }
+
+    public static String determinePrestige(int prestige){
+        return "\uF82C".repeat(prestige);
     }
 }

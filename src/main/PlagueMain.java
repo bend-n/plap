@@ -4,12 +4,15 @@ import arc.*;
 import arc.func.Boolf;
 import arc.func.Cons;
 import arc.math.Mathf;
+import arc.math.geom.Vec3;
 import arc.net.Server;
 import arc.struct.Seq;
 import arc.util.*;
 import com.mysql.cj.admin.ServerController;
-import com.sun.org.apache.xpath.internal.objects.XObject;
 import mindustry.Vars;
+import mindustry.ai.formations.Formation;
+import mindustry.ai.formations.patterns.CircleFormation;
+import mindustry.ai.types.FormationAI;
 import mindustry.content.*;
 import mindustry.core.GameState;
 import mindustry.core.Version;
@@ -30,6 +33,7 @@ import mindustry.world.Block;
 import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.Tiles;
+import mindustry.world.blocks.payloads.UnitPayload;
 import mindustry.world.blocks.sandbox.PowerSource;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.units.Reconstructor;
@@ -67,12 +71,6 @@ public class PlagueMain extends Plugin {
 
     private HashMap<String, CustomPlayer> uuidMapping = new HashMap<>();;
     private HashMap<Team, PlagueTeam> teams;
-
-    private Map<Team, String> colorMapping = new HashMap<Team, String>()
-    {{
-        put(Team.purple, "[scarlet]");
-        put(Team.blue, "[royal]");
-    }};
 
     private int pretime = 6;
 
@@ -219,9 +217,8 @@ public class PlagueMain extends Plugin {
                         cPly.monthWins++;
                         cPly.wins++;
                         player.sendMessage("[gold]+1 wins[accent] for a total of [gold]" + cPly.monthWins + "[accent] wins!");
-                        int addXp = 750 * (cPly.player.donatorLevel + 1);
-                        cPly.xp += addXp;
-                        cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for winning");
+                        int addXp = 750 * (cPly.player.donatorLevel*2 + 1);
+                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for winning");
                     }
 
                 });
@@ -259,21 +256,69 @@ public class PlagueMain extends Plugin {
                 Call.sendMessage("[accent]Units now deal [scarlet]" + percent + "%[accent] more damage and have " +
                         "[scarlet]" + percent + "%[accent] more health " +
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
+
+                Groups.player.each((player) -> {
+                    if(player.team() != Team.purple){
+                        CustomPlayer cPly = uuidMapping.get(player.uuid());
+                        int addXp = 50 * (cPly.player.donatorLevel*2 + 1);
+                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving");
+                    }
+
+                });
             }
 
             if(oneMinInterval.get(seconds)){
                 for(Player ply : Groups.player){
                     CustomPlayer cPly = uuidMapping.get(ply.uuid());
-                    if(cPly.hudEnabled) Call.infoPopup(ply.con, "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
-                                    "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.",
-                            60, 10, 120, 0, 140, 0);
+                    if(cPly.hudEnabled){
+                        showHud(ply);
+                    }
                 }
 
             }
 
             });
 
+        Events.on(EventType.PlayerSpawn.class, event ->{
+            if(event.player.team() == Team.blue) return;
+            Player ply = event.player;
+            CustomPlayer cPly = uuidMapping.get(ply.uuid());
+
+            for(Unit u: cPly.followers){
+                u.kill();
+                u.health = 0;
+            }
+            cPly.followers.clear();
+
+            switch(cPly.prestige){
+                case 0:
+                    for(int i=0;i<cPly.rank()/2;i++){
+                        Unit u = UnitTypes.poly.create(ply.team());
+                        u.set(ply.getX(), ply.getY());
+                        u.add();
+                        cPly.followers.add(u);
+                    } break;
+                case 1:
+                    for(int i=0;i<cPly.rank()/2;i++){
+                        Unit u = UnitTypes.mega.create(ply.team());
+                        u.set(ply.getX(), ply.getY());
+                        u.add();
+                        cPly.followers.add(u);
+                    } break;
+                default:
+                    for(int i=0;i<cPly.rank();i++){
+                        Unit u = UnitTypes.mega.create(ply.team());
+                        u.set(ply.getX(), ply.getY());
+                        u.add();
+                        cPly.followers.add(u);
+                    } break;
+            }
+
+        });
+
+
         Events.on(EventType.UnitCreateEvent.class, event -> {
+
             if(event.unit.type == UnitTypes.horizon && event.unit.team != Team.purple) {
                 // Let players know they can't build this unit
                 Call.label("Survivors can't build horizons!",
@@ -357,14 +402,16 @@ public class PlagueMain extends Plugin {
             if(event.unit.getPlayer() == null){
                 return;
             }
-            try {
-                if(event.team == Team.purple && cartesianDistance(event.tile.x, event.tile.y,
-                        plagueCore[0], plagueCore[1]) < world.height()/10){
-                    event.tile.build.indestructible = true;
-                }
-            }catch(NullPointerException e){
-                e.printStackTrace();
+            if(event.team == Team.purple && cartesianDistance(event.tile.x, event.tile.y,
+                    plagueCore[0], plagueCore[1]) < world.height()/10){
+                event.tile.build.indestructible = true;
             }
+
+            CustomPlayer cPly = uuidMapping.get(event.unit.getPlayer().uuid());
+            if(!event.breaking){
+                cPly.buildScore += event.tile.block().buildCost;
+            }
+
 
         });
 
@@ -384,9 +431,8 @@ public class PlagueMain extends Plugin {
 
                 for(CustomPlayer cPly : teams.get(Team.purple).players){
                     if(cPly.connected){
-                        int addXp = 100 * (cPly.player.donatorLevel + 1);
-                        cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors");
-                        cPly.xp += addXp;
+                        int addXp = 100 * (cPly.player.donatorLevel*2 + 1);
+                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors");
                     }
                 }
 
@@ -412,7 +458,7 @@ public class PlagueMain extends Plugin {
                 Player ply = uuidMapping.get(val[1]).player;
                 CustomPlayer cPly = uuidMapping.get(val[1]);
                 cPly.rawName = ply.name;
-                ply.name = StringHandler.determineRank(cPly.xp) + " " + ply.name;
+                ply.name = StringHandler.determinePrestige(cPly.prestige) + StringHandler.determineRank(cPly.xp) + " " + ply.name;
             } else if(event.value instanceof String[] && ((String[]) event.value)[0].equals("hudToggle")){
                 String[] val = (String[]) event.value;
                 CustomPlayer cPly = uuidMapping.get(val[1]);
@@ -482,13 +528,6 @@ public class PlagueMain extends Plugin {
             infect(cPly, true);
         });
 
-        handler.<Player>register("xp", "Show your xp", (args, player) -> {
-            CustomPlayer cPly = uuidMapping.get(player.uuid());
-            int xp = cPly.xp;
-            String nextRank = StringHandler.determineRank(xp+5000);
-            player.sendMessage("[scarlet]" + xp + "[accent] xp\nReach [scarlet]" + (xp/5000+1)*5000 + "[accent] xp to rank up to " + nextRank + "[accent]!");
-        });
-
         handler.<Player>register("stats", "Display stats about the current map", (args, player) -> {
             String s = "[accent]Map stats for: [white]" + state.map.name() + "\n" +
                     "[accent]Author: [white]" + state.map.author() + "\n" +
@@ -496,6 +535,29 @@ public class PlagueMain extends Plugin {
                     "[accent]Average time survived: [scarlet]" + avgSurvived/60 + "[accent] minutes and [scarlet]" + avgSurvived % 60 + "[accent] seconds.\n" +
                     "[accent]Suvivor record: [scarlet]" + mapRecord/60 + "[accent] minutes and [scarlet]" + mapRecord % 60 + "[accent] seconds.";
             player.sendMessage(s);
+
+        });
+
+        handler.<Player>register("prestige", "Display stats about the current map", (args, player) -> {
+
+            CustomPlayer cPly = uuidMapping.get(player.uuid());
+            if(cPly.rank() < 8){
+                player.sendMessage("[accent]You cannot prestige yet!");
+                return;
+            }
+            if(!cPly.wantsToPrestige){
+                player.sendMessage("[accent]Are you sure you want to [gold]prestige[accent]? You will lose all your " +
+                        "xp and reset to " + StringHandler.determineRank(0) +
+                        "\n\n[gold]Type [scarlet]/prestige[gold] again to confirm");
+                cPly.wantsToPrestige = true;
+                return;
+            }
+
+            cPly.prestige++;
+            cPly.xp = 0;
+            cPly.updateName();
+
+            player.sendMessage("[gold]You gaind 1 prestige point for a total of [scarlet]" + cPly.prestige);
 
         });
 
@@ -621,7 +683,8 @@ public class PlagueMain extends Plugin {
 
             cPly.team = Team.blue;
             cPly.player.team(Team.blue);
-            cPly.player.sendMessage(("[accent]You have left the team!"));
+            cPly.player.sendMessage(("[accent]You have left the team and are blacklisted!"));
+            pTeam.blacklistedPlayers.add(player.uuid());
             pTeam.removePlayer(cPly);
             if(pTeam.players.size() == 0){
                 pTeam.locked = true;
@@ -648,9 +711,9 @@ public class PlagueMain extends Plugin {
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
 
-        UnitTypes.alpha.health = 1f;
+        /*UnitTypes.alpha.health = 1f;
         UnitTypes.beta.health = 1f;
-        UnitTypes.gamma.health = 1f;
+        UnitTypes.gamma.health = 1f;*/
 
         polyWeapons = UnitTypes.poly.weapons.copy();
         megaWeapon = UnitTypes.mega.weapons.copy();
@@ -759,6 +822,7 @@ public class PlagueMain extends Plugin {
         cPly.player = player;
         cPly.team = cPly.player.team();
         cPly.rawName = player.name;
+        cPly.prestige = (int) entries.get("plaguePrestige");
         cPly.xp = (int) entries.get("plagueXP");
         cPly.wins = (int) entries.get("plagueWins");
         cPly.monthWins = (int) entries.get("plagueMonthWins");
@@ -788,9 +852,7 @@ public class PlagueMain extends Plugin {
 
         player.sendMessage(leaderboardString);
 
-        if(cPly.hudEnabled) Call.infoPopup(player.con, "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
-                        "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.",
-                60, 10, 120, 0, 140, 0);
+        if(cPly.hudEnabled) showHud(player);
     }
 
     private void updatePlayer(Player ply){
@@ -811,12 +873,38 @@ public class PlagueMain extends Plugin {
 
 
         CustomPlayer cPly = uuidMapping.get(ply.uuid());
-        ply.name = StringHandler.determineRank(cPly.xp) +
-                colorMapping.getOrDefault(ply.team(), "[olive]") + " " + cPly.rawName;
+        cPly.updateName();
     }
 
     private float cartesianDistance(float x, float y, float cx, float cy){
         return (float) Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2) );
+    }
+
+    void showHud(Player ply){
+        CustomPlayer cPly = uuidMapping.get(ply.uuid());
+        String s = "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
+                "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.\n\n";
+        if(cPly.rank() == 8){
+            s += "[gold]You are at the max rank!\n" +
+                    "[accent]Use [scarlet]/prestige[accent] to reset your\nrank and gain a prestige point";
+        }else{
+            s += "Current XP: " + StringHandler.determineRank(cPly.xp) + "[scarlet] " + cPly.xp +  "\n" +
+                    "[accent]Next rank: " + StringHandler.determineRank(5000*(cPly.xp/5000+1)) + "[scarlet] " +
+                    (5000*(cPly.xp/5000+1));
+            s += "\n[accent]Reach " + StringHandler.determineRank((cPly.rank()+2)*15000) + " to get [gold]+1[accent] unit";
+            s += "\n\n[accent]Prestige: " + StringHandler.determinePrestige(cPly.prestige) + "[accent]";
+            switch(cPly.prestige){
+                case 0: s += "(mono)";break;
+                case 1: s += "(mega)";break;
+                default: s += "(mega*2)";break;
+            }
+
+            if(ply.donatorLevel == 0) s += "\n\n[gold]With donator ([purple]/donate[gold]),\n" +
+                    "you would be " + StringHandler.determineRank(cPly.xp*3);
+        }
+        s += "\n\n[accent]Disabled hud with [scarlet]/hud";
+        Call.infoPopup(ply.con, s,
+                60, 10, 120, 0, 140, 0);
     }
 
     void savePlayerData(String uuid){
@@ -828,8 +916,8 @@ public class PlagueMain extends Plugin {
         CustomPlayer cPly = uuidMapping.get(uuid);
         cPly.team = cPly.player.team();
 
-        String[] keys = {"plagueXP", "plagueMonthWins", "plagueWins"};
-        Object[] vals = {cPly.xp, cPly.monthWins, cPly.wins};
+        String[] keys = {"plaguePrestige", "plagueXP", "plagueMonthWins", "plagueWins"};
+        Object[] vals = {cPly.prestige, cPly.xp, cPly.monthWins, cPly.wins};
 
         db.saveRow("mindustry_data", "uuid", uuid, keys, vals);
     }
@@ -851,13 +939,11 @@ public class PlagueMain extends Plugin {
                     (newRecord ? "    [gold]New record!\n" : "") +
                     "[accent]Survive time: [scarlet]" + timeNow/60 + "[accent] minutes and [scarlet]" +
                     timeNow % 60 + "[accent] seconds.");
-            int addXp = 500 * (cPly.player.donatorLevel + 1);
-            cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for surviving the longest");
-            cPly.xp += addXp;
+            int addXp = 500 * (cPly.player.donatorLevel*2 + 1);
+            cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving the longest");
             if(newRecord){
-                addXp = 2000 * (cPly.player.donatorLevel + 1);
-                cPly.player.sendMessage("[accent]+[scarlet]" + addXp + "xp[accent] for setting a record");
-                cPly.xp += addXp;
+                addXp = 2000 * (cPly.player.donatorLevel*2 + 1);
+                cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for setting a record");
             }
 
         }
@@ -902,6 +988,7 @@ public class PlagueMain extends Plugin {
 
     }
 
+
     // Long term stuff
 
     void checkExpiration(){
@@ -930,12 +1017,13 @@ public class PlagueMain extends Plugin {
 
 
     void rankReset(){
-        // Reset ranks
+
+        /*// Reset ranks
         db.setColumn("mindustry_data", "plagueXP", 0);
 
         for(CustomPlayer cPly : uuidMapping.values()){
             cPly.xp = 0;
-        }
+        }*/
     }
 
     void winsReset(){
@@ -979,8 +1067,6 @@ public class PlagueMain extends Plugin {
         loadMap(args);
         resetting = false;
     }
-
-
 
     void loadMap(String args[]){
 
