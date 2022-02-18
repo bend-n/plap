@@ -24,6 +24,8 @@ public class CustomPlayer {
     public boolean wantsToPrestige = false;
 
     public Seq<Unit> followers = new Seq<>();
+    public int controlledT5;
+    public int bannedT5 = -1000;
 
     private Map<Team, String> colorMapping = new HashMap<Team, String>()
     {{
@@ -49,7 +51,7 @@ public class CustomPlayer {
         if(!connected){
             return;
         }
-        if(buildScore < 15000){
+        if(buildScore < 7500){
             player.sendMessage("[accent]You must contribute more to receive XP!");
             return;
         }

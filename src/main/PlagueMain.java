@@ -18,6 +18,7 @@ import mindustry.core.GameState;
 import mindustry.core.Version;
 import mindustry.core.World;
 import mindustry.entities.bullet.BulletType;
+import mindustry.entities.bullet.PointBulletType;
 import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
@@ -33,6 +34,7 @@ import mindustry.world.Block;
 import mindustry.world.Build;
 import mindustry.world.Tile;
 import mindustry.world.Tiles;
+import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.payloads.UnitPayload;
 import mindustry.world.blocks.sandbox.PowerSource;
 import mindustry.world.blocks.storage.CoreBlock;
@@ -316,6 +318,44 @@ public class PlagueMain extends Plugin {
 
         });
 
+        Events.on(EventType.UnitControlEvent.class, event ->{
+            if(Arrays.asList(UnitTypes.toxopid,
+                    UnitTypes.eclipse,
+                    UnitTypes.corvus,
+                    UnitTypes.oct,
+                    UnitTypes.reign,
+                    UnitTypes.omura).contains(event.unit.type)){
+                CustomPlayer cPly = uuidMapping.get(event.player.uuid());
+
+                if(seconds < cPly.bannedT5){
+                    event.player.clearUnit();
+                    event.player.sendMessage("[accent]You killed a T5 too fast recently! " +
+                            "You are banned from controlling T5 units for [scarlet]" + (cPly.bannedT5 - seconds) +
+                            "[accent] more seconds!");
+                    return;
+                }
+                cPly.controlledT5 = seconds;
+            }
+        });
+
+        Events.on(EventType.UnitDestroyEvent.class, event ->{
+            if(Arrays.asList(UnitTypes.toxopid,
+                    UnitTypes.eclipse,
+                    UnitTypes.corvus,
+                    UnitTypes.oct,
+                    UnitTypes.reign,
+                    UnitTypes.omura).contains(event.unit.type) &&
+                event.unit.isPlayer()){
+                Player ply = event.unit.getPlayer();
+                CustomPlayer cPly = uuidMapping.get(ply.uuid());
+
+                int diff = seconds - cPly.controlledT5;
+                if(diff > 10 && diff < 240){
+                    ply.sendMessage("[scarlet]You killed the T5 too quickly! You are banned from controlling T5's for 5 minutes!");
+                    cPly.bannedT5 = seconds + 3 * 5;
+                }
+            }
+        });
 
         Events.on(EventType.UnitCreateEvent.class, event -> {
 
@@ -445,7 +485,7 @@ public class PlagueMain extends Plugin {
         });
 
         Events.on(EventType.TapEvent.class, event ->{
-            if(event.tile.block() == Blocks.vault && event.tile.team() != Team.purple){
+            if(event.tile.block() == Blocks.vault && event.tile.team() != Team.purple && event.player.team() == event.tile.team()){
                 if(event.tile.build.items.has(Items.thorium, 997)){
                     event.tile.build.tile.setNet(Blocks.coreShard, event.tile.team(), 0);
                 }
@@ -538,7 +578,7 @@ public class PlagueMain extends Plugin {
 
         });
 
-        handler.<Player>register("prestige", "Display stats about the current map", (args, player) -> {
+        handler.<Player>register("prestige", "Prestige and reset your xp to 0", (args, player) -> {
 
             CustomPlayer cPly = uuidMapping.get(player.uuid());
             if(cPly.rank() < 8){
@@ -743,6 +783,22 @@ public class PlagueMain extends Plugin {
         ((Reconstructor) Blocks.additiveReconstructor).upgrades.remove(3);
 
         additiveNoFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades.copy();
+
+        ((ItemTurret) Blocks.foreshadow).ammo(
+                Items.surgeAlloy, new PointBulletType(){{
+                    shootEffect = Fx.instShoot;
+                    hitEffect = Fx.instHit;
+                    smokeEffect = Fx.smokeCloud;
+                    trailEffect = Fx.instTrail;
+                    despawnEffect = Fx.instBomb;
+                    trailSpacing = 20f;
+                    damage = 1350;
+                    buildingDamageMultiplier = 0f;
+                    speed = 500f;
+                    hitShake = 6f;
+                    ammoMultiplier = 1f;
+                }}
+        );
     }
 
     void resetRules(){
@@ -891,7 +947,7 @@ public class PlagueMain extends Plugin {
             s += "Current XP: " + StringHandler.determineRank(cPly.xp) + "[scarlet] " + cPly.xp +  "\n" +
                     "[accent]Next rank: " + StringHandler.determineRank(5000*(cPly.xp/5000+1)) + "[scarlet] " +
                     (5000*(cPly.xp/5000+1));
-            s += "\n[accent]Reach " + StringHandler.determineRank((cPly.rank()+2)*15000) + " to get [gold]+1[accent] unit";
+            s += "\n[accent]Reach " + StringHandler.determineRank((cPly.rank()/2+1)*30000) + " to get [gold]+1[accent] unit";
             s += "\n\n[accent]Prestige: " + StringHandler.determinePrestige(cPly.prestige) + "[accent]";
             switch(cPly.prestige){
                 case 0: s += "(mono)";break;
