@@ -113,6 +113,16 @@ public class PlagueMain extends Plugin {
 
     public int counts;
 
+    String info = "[#4d004d]{[purple]AA[#4d004d]} [olive]Plague[accent] is a survival game mode with two teams," +
+            " the [scarlet]Plague [accent]and [green]Survivors[accent].\n\n" +
+            "The [scarlet]Plague[accent] build up their economy to make the biggest army possible, and try to" +
+            " break through the [green]Survivors[accent] defenses.\n\n" +
+            "The [green]Survivors[accent] build up a huge defense and last 45 minutes to win.\n\n" +
+            "To become a " +
+            "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
+            "allowed to choose your team. Place any block to place a core at the start of the game.\n\n" +
+            "Air units do no damage before 45 minutes";
+
 
     @Override
     public void init(){
@@ -184,8 +194,9 @@ public class PlagueMain extends Plugin {
                     }
 
                     teams.remove(Team.blue);
-                    Log.info("No survs endgame, Count: " + counts);
+
                     if(teams.size() == 1){
+                        Log.info("No survs endgame, Count: " + counts);
                         endgame(new Seq<>());
                     }else{
                         Call.sendMessage("[accent]The game has started! [green]Survivors[accent] must survive for [gold]" +
@@ -326,6 +337,12 @@ public class PlagueMain extends Plugin {
                     UnitTypes.reign,
                     UnitTypes.omura).contains(event.unit.type)){
                 CustomPlayer cPly = uuidMapping.get(event.player.uuid());
+
+                if(event.player.playTime < 600){
+                    event.player.sendMessage("[accent]You need at least [scarlet]600[accent] minutes of playtime " +
+                            "before you can control a T5!");
+                    return;
+                }
 
                 if(seconds < cPly.bannedT5){
                     event.player.clearUnit();
@@ -621,14 +638,7 @@ public class PlagueMain extends Plugin {
         });
 
         handler.<Player>register("info", "Display info about the current game", (args, player) -> {
-            player.sendMessage("[#4d004d]{[purple]AA[#4d004d]} [olive]Plague[accent] is a survival game mode with two teams," +
-                    " the [scarlet]Plague [accent]and [green]Survivors[accent].\n\n" +
-                    "The [scarlet]Plague[accent] build up their economy and make the biggest army possible, and try to" +
-                    " break through the [green]Survivors[accent] defenses.\n\n" +
-                    "The [green]Survivors[accent] build up a huge defense and last as long as possible. To become a " +
-                    "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
-                    " allowed to choose your team. Place any block to place a core at the start of the game.\n\n" +
-                    "Air factories are only able to make monos, and all air units do no damage.");
+            Call.infoMessage(player.con, info);
         });
 
         handler.<Player>register("teamlock", "Toggles locking team, preventing other players from joining your team (leader only)", (args, player) -> {
@@ -681,11 +691,15 @@ public class PlagueMain extends Plugin {
                             other.player.name.equalsIgnoreCase(args[0]) ||
                             other.rawName.equalsIgnoreCase(args[0])){
                         if(other.player == player) continue;
-                        other.team = Team.blue;
-                        other.player.team(Team.blue);
+
+                        Team teamToSet = pregame ? Team.blue : Team.purple;
+
+                        other.team = teamToSet;
+                        other.player.team(teamToSet);
                         other.player.sendMessage(("[accent]You have been kicked from the team!"));
                         pTeam.blacklistedPlayers.add(other.player.uuid());
                         pTeam.removePlayer(other);
+                        updatePlayer(other.player);
                         return;
                     }
                 }
@@ -726,6 +740,7 @@ public class PlagueMain extends Plugin {
             cPly.player.sendMessage(("[accent]You have left the team and are blacklisted!"));
             pTeam.blacklistedPlayers.add(player.uuid());
             pTeam.removePlayer(cPly);
+            updatePlayer(cPly.player);
             if(pTeam.players.size() == 0){
                 pTeam.locked = true;
                 killTiles(pTeam.team);
@@ -784,7 +799,7 @@ public class PlagueMain extends Plugin {
 
         additiveNoFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades.copy();
 
-        ((ItemTurret) Blocks.foreshadow).ammo(
+        /*((ItemTurret) Blocks.foreshadow).ammo(
                 Items.surgeAlloy, new PointBulletType(){{
                     shootEffect = Fx.instShoot;
                     hitEffect = Fx.instHit;
@@ -798,7 +813,7 @@ public class PlagueMain extends Plugin {
                     hitShake = 6f;
                     ammoMultiplier = 1f;
                 }}
-        );
+        );*/
     }
 
     void resetRules(){
@@ -908,6 +923,10 @@ public class PlagueMain extends Plugin {
 
         player.sendMessage(leaderboardString);
 
+        if(cPly.xp < 1000 && cPly.prestige < 1){
+            Call.infoMessage(player.con, info);
+        }
+
         if(cPly.hudEnabled) showHud(player);
     }
 
@@ -956,7 +975,7 @@ public class PlagueMain extends Plugin {
             }
 
             if(ply.donatorLevel == 0) s += "\n\n[gold]With donator ([purple]/donate[gold]),\n" +
-                    "you would be " + StringHandler.determineRank(cPly.xp*3);
+                    "you get [green]triple XP";
         }
         s += "\n\n[accent]Disabled hud with [scarlet]/hud";
         Call.infoPopup(ply.con, s,
