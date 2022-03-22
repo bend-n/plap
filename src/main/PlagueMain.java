@@ -145,12 +145,14 @@ public class PlagueMain extends Plugin {
         };
 
         netServer.admins.addActionFilter((action) -> {
-
             if(action.player != null && action.tile != null){
-                /*if(cartesianDistance(action.tile.x, action.tile.y,
-                        plagueCore[0], plagueCore[1]) < world.height()/4){
-                    if(action.player.team() != Team.purple) return false;
-                }*/
+                if(cartesianDistance(action.tile.x, action.tile.y,
+                        plagueCore[0], plagueCore[1]) < world.height()/2.6){
+                    if(action.player.team() != Team.purple && action.block == Blocks.vault) {
+                        action.player.sendMessage("[scarlet]Cannot place vault that close to plague!");
+                        return false;
+                    }
+                }
                 if(action.tile.block() == Blocks.powerSource){
                     return false;
                 }
@@ -239,8 +241,9 @@ public class PlagueMain extends Plugin {
                 Call.sendMessage("[scarlet]The plague can now build and attack with air units!");
                 // BUFF DA PLAGUE (enable air)
 
-                // UnitTypes.poly.weapons = polyWeapons; So survivor polys can't do damage
-                UnitTypes.mega.weapons = megaWeapon;
+                // So survivor megas can't do damage
+                // UnitTypes.poly.weapons = polyWeapons;
+                // UnitTypes.mega.weapons = megaWeapon;
                 UnitTypes.quad.weapons = quadWeapon;
                 UnitTypes.oct.weapons = octWeapon;
 
@@ -958,7 +961,8 @@ public class PlagueMain extends Plugin {
     void showHud(Player ply){
         CustomPlayer cPly = uuidMapping.get(ply.uuid());
         String s = "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
-                "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.\n\n";
+                "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.\n" +
+                "Monthly wins: [gold]" + cPly.monthWins + "\n\n";
         if(cPly.rank() == 8){
             s += "[gold]You are at the max rank!\n" +
                     "[accent]Use [scarlet]/prestige[accent] to reset your\nrank and gain a prestige point";
@@ -977,7 +981,7 @@ public class PlagueMain extends Plugin {
             if(ply.donatorLevel == 0) s += "\n\n[gold]With donator ([purple]/donate[gold]),\n" +
                     "you get [green]triple XP";
         }
-        s += "\n\n[accent]Disabled hud with [scarlet]/hud";
+        s += "\n\n[accent]Disable hud with [scarlet]/hud";
         Call.infoPopup(ply.con, s,
                 60, 10, 120, 0, 140, 0);
     }
