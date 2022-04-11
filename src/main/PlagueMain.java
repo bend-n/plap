@@ -41,6 +41,7 @@ import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.units.Reconstructor;
 import mindustry.world.blocks.units.UnitFactory;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
@@ -66,7 +67,7 @@ public class PlagueMain extends Plugin {
     private Seq<Weapon> quadWeapon;
     private Seq<Weapon> octWeapon;
 
-    private HashMap<UnitType, Float> origonalUnitHealth = new HashMap<>();
+    private HashMap<UnitType, Float> originalUnitHealth = new HashMap<>();
 
     private Seq<UnitType[]> additiveFlare;
     private Seq<UnitType[]> additiveNoFlare;
@@ -94,7 +95,8 @@ public class PlagueMain extends Plugin {
 
     private mindustry.maps.Map loadedMap;
 
-    private int currMap = 0;
+    private ArrayList<Integer> rotation = new ArrayList<Integer>();
+    private int mapIndex = 0;
     private String mapID = "0";
 
     private int mapRecord;
@@ -147,9 +149,10 @@ public class PlagueMain extends Plugin {
         netServer.admins.addActionFilter((action) -> {
             if(action.player != null && action.tile != null){
                 if(cartesianDistance(action.tile.x, action.tile.y,
-                        plagueCore[0], plagueCore[1]) < world.height()/2.6){
-                    if(action.player.team() != Team.purple && action.block == Blocks.vault) {
-                        action.player.sendMessage("[scarlet]Cannot place vault that close to plague!");
+                        plagueCore[0], plagueCore[1]) < world.height()/2.75){
+                    if((action.player.team() != Team.purple && action.block == Blocks.vault)
+                        || action.player.team() == Team.blue) {
+                        action.player.sendMessage("[scarlet]Cannot place core/vault that close to plague!");
                         return false;
                     }
                 }
@@ -265,7 +268,7 @@ public class PlagueMain extends Plugin {
 
                 for (UnitType u : Vars.content.units()) {
                     if(u != UnitTypes.alpha && u != UnitTypes.beta && u != UnitTypes.gamma){
-                        u.health = origonalUnitHealth.get(u) * multiplier;
+                        u.health = originalUnitHealth.get(u) * multiplier;
                     }
                 }
                 String percent = "" + Math.round((multiplyBy-1)*100);
@@ -579,6 +582,15 @@ public class PlagueMain extends Plugin {
 
     @Override
     public void registerClientCommands(CommandHandler handler){
+        handler.<Player>register("endplague", "[scarlet]Ends the plague game (admin only)", (args, player) -> {
+            if(!player.admin){
+                player.sendMessage("[accent]Admin only!");
+                return;
+            }
+            Call.sendMessage("[scarlet]" + player.name +  " [accent]has ended the plague game. Ending in 10 seconds...");
+            endgame(new Seq<>());
+        });
+
         handler.<Player>register("infect", "Infect yourself", (args, player) -> {
             if(player.team() == Team.purple){
                 player.sendMessage("[accent]Already infected!");
@@ -794,7 +806,7 @@ public class PlagueMain extends Plugin {
         rules.modeName = "Plague";
 
         for (UnitType u : Vars.content.units()) {
-            origonalUnitHealth.put(u, u.health);
+            originalUnitHealth.put(u, u.health);
         }
 
         additiveFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades.copy();
@@ -817,6 +829,11 @@ public class PlagueMain extends Plugin {
                     ammoMultiplier = 1f;
                 }}
         );*/
+
+        for(int i = 0; i < maps.customMaps().size; i++){
+            rotation.add(i);
+        }
+        Collections.shuffle(rotation);
     }
 
     void resetRules(){
@@ -827,6 +844,14 @@ public class PlagueMain extends Plugin {
         UnitTypes.oct.weapons = new Seq<>();
 
         ((Reconstructor) Blocks.additiveReconstructor).upgrades = additiveNoFlare;
+
+        for (UnitType u : Vars.content.units()) {
+            if(u != UnitTypes.alpha && u != UnitTypes.beta && u != UnitTypes.gamma){
+                u.health = originalUnitHealth.get(u);
+            }
+        }
+
+        state.rules.unitDamageMultiplier = 1;
 
     }
 
@@ -1149,8 +1174,8 @@ public class PlagueMain extends Plugin {
 
     void loadMap(String args[]){
 
-        int lastMap = currMap;
-
+        int currMap;
+        mapIndex = (mapIndex + 1) % maps.customMaps().size;
         if(args.length > 0){
             int i = 0;
             for(mindustry.maps.Map map : maps.customMaps()){
@@ -1160,7 +1185,7 @@ public class PlagueMain extends Plugin {
 
             currMap = Integer.parseInt(args[0]);
         } else{
-            currMap = PlagueData.getRandomWithExclusion(0, maps.customMaps().size-1, lastMap);
+            currMap = rotation.get(mapIndex);
         }
 
         Seq<Player> players = new Seq<>();
@@ -1173,9 +1198,12 @@ public class PlagueMain extends Plugin {
 
         logic.reset();
         mindustry.maps.Map map = maps.customMaps().get(currMap);
+        Log.info("Loading map " + map.name());
 
         world.loadMap(map);
         loadedMap = state.map;
+
+
 
         Tile tile = state.teams.cores(Team.purple).find(build -> build.block == Blocks.coreNucleus).tile;
 
@@ -1203,7 +1231,7 @@ public class PlagueMain extends Plugin {
 
 
 
-        Log.info("Map " + loadedMap.name() + " loaded");
+
 
         if (firstRun) {
             Log.info("Server not up, starting server...");
