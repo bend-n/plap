@@ -4,21 +4,35 @@ import arc.math.Mathf;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import mindustry.Vars;
-import mindustry.content.Blocks;
-import mindustry.content.Bullets;
-import mindustry.content.Fx;
-import mindustry.content.Items;
+import mindustry.content.*;
 import mindustry.gen.Sounds;
+import mindustry.gen.Unit;
 import mindustry.type.ItemStack;
+import mindustry.type.UnitType;
 import mindustry.type.Weapon;
 import mindustry.world.Block;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class PlagueData {
+
+    public static final List<PrestigeLevel> prestiges;
+    static{
+        prestiges = new ArrayList<>();
+        prestiges.add(new PrestigeLevel("Alpha", UnitTypes.alpha, 2));
+        prestiges.add(new PrestigeLevel("Alpha*2", UnitTypes.alpha, 1));
+        prestiges.add(new PrestigeLevel("Beta", UnitTypes.beta, 2));
+        prestiges.add(new PrestigeLevel("Beta*2", UnitTypes.beta, 1));
+        prestiges.add(new PrestigeLevel("Gamma", UnitTypes.gamma, 2));
+        prestiges.add(new PrestigeLevel("Gamma*2", UnitTypes.gamma, 1));
+        prestiges.add(new PrestigeLevel("Poly", UnitTypes.poly, 2));
+        prestiges.add(new PrestigeLevel("Poly*2", UnitTypes.poly, 1));
+        prestiges.add(new PrestigeLevel("Mega", UnitTypes.mega, 2));
+        prestiges.add(new PrestigeLevel("Mega*2", UnitTypes.mega, 1));
+    }
+
+
+
 
     public static final Map<String, Float> itemValues;
     static {
@@ -83,4 +97,16 @@ public class PlagueData {
     }
 
 
+}
+
+class PrestigeLevel {
+    public String name;
+    public UnitType unit;
+    public int frequency;
+
+    public PrestigeLevel(String name, UnitType unit, int frequency){
+        this.name = name;
+        this.unit = unit;
+        this.frequency = frequency;
+    }
 }

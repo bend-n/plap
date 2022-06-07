@@ -309,28 +309,15 @@ public class PlagueMain extends Plugin {
             }
             cPly.followers.clear();
 
-            switch(cPly.prestige){
-                case 0:
-                    for(int i=0;i<cPly.rank()/2;i++){
-                        Unit u = UnitTypes.poly.create(ply.team());
-                        u.set(ply.getX(), ply.getY());
-                        u.add();
-                        cPly.followers.add(u);
-                    } break;
-                case 1:
-                    for(int i=0;i<cPly.rank()/2;i++){
-                        Unit u = UnitTypes.mega.create(ply.team());
-                        u.set(ply.getX(), ply.getY());
-                        u.add();
-                        cPly.followers.add(u);
-                    } break;
-                default:
-                    for(int i=0;i<cPly.rank();i++){
-                        Unit u = UnitTypes.mega.create(ply.team());
-                        u.set(ply.getX(), ply.getY());
-                        u.add();
-                        cPly.followers.add(u);
-                    } break;
+            PrestigeLevel prestigeLevel = PlagueData.prestiges.get(Math.min(cPly.prestige, PlagueData.prestiges.size()-1));
+            UnitType unitToSpawn = prestigeLevel.unit;
+            int frequency = prestigeLevel.frequency;
+
+            for(int i=0; i<cPly.rank()/frequency;i++){
+                Unit u = unitToSpawn.create(ply.team());
+                u.set(ply.getX(), ply.getY());
+                u.add();
+                cPly.followers.add(u);
             }
 
         });
@@ -494,7 +481,7 @@ public class PlagueMain extends Plugin {
 
                 for(CustomPlayer cPly : teams.get(Team.purple).players){
                     if(cPly.connected){
-                        int addXp = 100 * (cPly.player.donatorLevel*2 + 1);
+                        int addXp = 300 * (cPly.player.donatorLevel*2 + 1);
                         cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors");
                     }
                 }
@@ -521,7 +508,7 @@ public class PlagueMain extends Plugin {
                 Player ply = uuidMapping.get(val[1]).player;
                 CustomPlayer cPly = uuidMapping.get(val[1]);
                 cPly.rawName = ply.name;
-                ply.name = StringHandler.determinePrestige(cPly.prestige) + StringHandler.determineRank(cPly.xp) + " " + ply.name;
+                ply.name = StringHandler.determinePrestige(cPly.prestige) + StringHandler.determineRank(cPly.xp) + "\u00A0" + ply.name;
             } else if(event.value instanceof String[] && ((String[]) event.value)[0].equals("hudToggle")){
                 String[] val = (String[]) event.value;
                 CustomPlayer cPly = uuidMapping.get(val[1]);
@@ -643,11 +630,22 @@ public class PlagueMain extends Plugin {
             player.sendMessage(leaderboardString);
         });
 
+        handler.<Player>register("xp", "Display your current xp", (args, player) -> {
+            CustomPlayer cPly = uuidMapping.get(player.uuid());
+            String s = "";
+            s += "Current XP: " + StringHandler.determineRank(cPly.xp) + "[scarlet] " + cPly.xp +  "\n" +
+                    "[accent]Next rank: " + StringHandler.determineRank(5000*(cPly.xp/5000+1)) + "[scarlet] " +
+                    (5000*(cPly.xp/5000+1));
+            PrestigeLevel prestigeLevel = PlagueData.prestiges.get(Math.min(cPly.prestige, PlagueData.prestiges.size()-1));
+            s += "\n[accent]Reach " + StringHandler.determineRank((cPly.rank()/prestigeLevel.frequency +1)*30000) + " to get [gold]+1[accent] unit";
+        });
+
         handler.<Player>register("rules", "Display the rules", (args, player) -> {
             player.sendMessage("[accent] Basic rules (these are on top of the obvious ones like no griefing, racial slurs etc):\n\n" +
                     "[gold] - [scarlet]No[accent] survivor PVP. Do not attack other survivors as a survivor\n" +
                     "[gold] - [scarlet]No[accent] malicious cores. Do not place a core inside someone elses base on purpose\n" +
                     "[gold] - [scarlet]Don't[accent] waste resources on useless or uneeded schematics\n" +
+                    "[gold] - [scarlet]Don't[accent] blast/plast/pyra bomb. [gold]Fuse bombing is ok\n" +
                     "[gold] - [accent]If you go afk, don't build up your defenses, or place a core behind another team to try" +
                     " and get them to build a defense for you, it is likely an admin with /destroy your core.");
         });
@@ -987,24 +985,15 @@ public class PlagueMain extends Plugin {
         CustomPlayer cPly = uuidMapping.get(ply.uuid());
         String s = "[accent]Time survived:   [orange]" + seconds/60 + "[accent] mins.\n" +
                 "All-time record: [gold]" + mapRecord / 60 + "[accent] mins.\n" +
-                "Monthly wins: [gold]" + cPly.monthWins + "\n\n";
+                "Monthly wins: [gold]" + cPly.monthWins + "\n";
         if(cPly.rank() == 8){
             s += "[gold]You are at the max rank!\n" +
                     "[accent]Use [scarlet]/prestige[accent] to reset your\nrank and gain a prestige point";
         }else{
-            s += "Current XP: " + StringHandler.determineRank(cPly.xp) + "[scarlet] " + cPly.xp +  "\n" +
-                    "[accent]Next rank: " + StringHandler.determineRank(5000*(cPly.xp/5000+1)) + "[scarlet] " +
-                    (5000*(cPly.xp/5000+1));
             s += "\n[accent]Reach " + StringHandler.determineRank((cPly.rank()/2+1)*30000) + " to get [gold]+1[accent] unit";
             s += "\n\n[accent]Prestige: " + StringHandler.determinePrestige(cPly.prestige) + "[accent]";
-            switch(cPly.prestige){
-                case 0: s += "(mono)";break;
-                case 1: s += "(mega)";break;
-                default: s += "(mega*2)";break;
-            }
-
-            if(ply.donatorLevel == 0) s += "\n\n[gold]With donator ([purple]/donate[gold]),\n" +
-                    "you get [green]triple XP";
+            PrestigeLevel prestigeLevel = PlagueData.prestiges.get(Math.min(cPly.prestige, PlagueData.prestiges.size()-1));
+            s += "(" + prestigeLevel.name + ")";
         }
         s += "\n\n[accent]Disable hud with [scarlet]/hud";
         Call.infoPopup(ply.con, s,

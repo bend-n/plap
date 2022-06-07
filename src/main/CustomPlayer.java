@@ -44,7 +44,7 @@ public class CustomPlayer {
 
     public void updateName(){
         player.name = StringHandler.determinePrestige(prestige) + StringHandler.determineRank(xp) +
-                colorMapping.getOrDefault(player.team(), "[olive]") + " " + rawName;
+                colorMapping.getOrDefault(player.team(), "[olive]") + "\u00A0" + rawName;
     }
 
     public void addXP(int add, String message){
