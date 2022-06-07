@@ -303,23 +303,7 @@ public class PlagueMain extends Plugin {
             Player ply = event.player;
             CustomPlayer cPly = uuidMapping.get(ply.uuid());
 
-            for(Unit u: cPly.followers){
-                u.kill();
-                u.health = 0;
-            }
-            cPly.followers.clear();
-
-            PrestigeLevel prestigeLevel = PlagueData.prestiges.get(Math.min(cPly.prestige, PlagueData.prestiges.size()-1));
-            UnitType unitToSpawn = prestigeLevel.unit;
-            int frequency = prestigeLevel.frequency;
-
-            for(int i=0; i<cPly.rank()/frequency;i++){
-                Unit u = unitToSpawn.create(ply.team());
-                u.set(ply.getX(), ply.getY());
-                u.add();
-                cPly.followers.add(u);
-            }
-
+            spawnPlayerUnits(cPly, ply);
         });
 
         Events.on(EventType.UnitControlEvent.class, event ->{
@@ -380,6 +364,8 @@ public class PlagueMain extends Plugin {
 
         Events.on(EventType.PlayerJoinSecondary.class, event ->{
             loadPlayer(event.player);
+
+
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
@@ -601,7 +587,7 @@ public class PlagueMain extends Plugin {
 
             CustomPlayer cPly = uuidMapping.get(player.uuid());
             if(cPly.rank() < 8){
-                player.sendMessage("[accent]You cannot prestige yet!");
+                player.sendMessage("[accent]You cannot prestige yet!\n\nUse [gold]/prestige[accent] to unlock better spawn units!");
                 return;
             }
             if(!cPly.wantsToPrestige){
@@ -616,7 +602,7 @@ public class PlagueMain extends Plugin {
             cPly.xp = 0;
             cPly.updateName();
 
-            player.sendMessage("[gold]You gaind 1 prestige point for a total of [scarlet]" + cPly.prestige);
+            player.sendMessage("[gold]You gained 1 prestige point for a total of [scarlet]" + cPly.prestige);
 
         });
 
@@ -633,21 +619,20 @@ public class PlagueMain extends Plugin {
         handler.<Player>register("xp", "Display your current xp", (args, player) -> {
             CustomPlayer cPly = uuidMapping.get(player.uuid());
             String s = "";
-            s += "Current XP: " + StringHandler.determineRank(cPly.xp) + "[scarlet] " + cPly.xp +  "\n" +
+            s += "[accent]Current XP: " + StringHandler.determineRank(cPly.xp) + "[scarlet] " + cPly.xp +  "\n" +
                     "[accent]Next rank: " + StringHandler.determineRank(5000*(cPly.xp/5000+1)) + "[scarlet] " +
                     (5000*(cPly.xp/5000+1));
             PrestigeLevel prestigeLevel = PlagueData.prestiges.get(Math.min(cPly.prestige, PlagueData.prestiges.size()-1));
-            s += "\n[accent]Reach " + StringHandler.determineRank((cPly.rank()/prestigeLevel.frequency +1)*30000) + " to get [gold]+1[accent] unit";
+            s += "\n[accent]Reach " + StringHandler.determineRank((cPly.rank()/prestigeLevel.frequency +1)*30000) + " to get [gold]+1[white] " + prestigeLevel.name;
+            player.sendMessage(s);
         });
 
         handler.<Player>register("rules", "Display the rules", (args, player) -> {
             player.sendMessage("[accent] Basic rules (these are on top of the obvious ones like no griefing, racial slurs etc):\n\n" +
                     "[gold] - [scarlet]No[accent] survivor PVP. Do not attack other survivors as a survivor\n" +
-                    "[gold] - [scarlet]No[accent] malicious cores. Do not place a core inside someone elses base on purpose\n" +
-                    "[gold] - [scarlet]Don't[accent] waste resources on useless or uneeded schematics\n" +
-                    "[gold] - [scarlet]Don't[accent] blast/plast/pyra bomb. [gold]Fuse bombing is ok\n" +
-                    "[gold] - [accent]If you go afk, don't build up your defenses, or place a core behind another team to try" +
-                    " and get them to build a defense for you, it is likely an admin with /destroy your core.");
+                    "[gold] - [scarlet]No[accent] malicious cores. Do not place a core inside someone else's base on purpose\n" +
+                    "[gold] - [scarlet]Don't[accent] waste resources on useless or unneeded schematics\n" +
+                    "[gold] - [scarlet]Don't[accent] blast/plast/pyra/oil bomb. [gold]Fuse bombing is ok\n");
         });
 
         handler.<Player>register("info", "Display info about the current game", (args, player) -> {
@@ -954,6 +939,29 @@ public class PlagueMain extends Plugin {
         }
 
         if(cPly.hudEnabled) showHud(player);
+
+        // Spawn their starter units
+
+        spawnPlayerUnits(cPly, player);
+    }
+
+    private void spawnPlayerUnits(CustomPlayer cPly, Player ply){
+        for(Unit u: cPly.followers){
+            u.kill();
+            u.health = 0;
+        }
+        cPly.followers.clear();
+
+        PrestigeLevel prestigeLevel = PlagueData.prestiges.get(Math.min(cPly.prestige, PlagueData.prestiges.size()-1));
+        UnitType unitToSpawn = prestigeLevel.unit;
+        int frequency = prestigeLevel.frequency;
+
+        for(int i=0; i<cPly.rank()/frequency;i++){
+            Unit u = unitToSpawn.create(ply.team());
+            u.set(ply.getX(), ply.getY());
+            u.add();
+            cPly.followers.add(u);
+        }
     }
 
     private void updatePlayer(Player ply){
@@ -975,6 +983,11 @@ public class PlagueMain extends Plugin {
 
         CustomPlayer cPly = uuidMapping.get(ply.uuid());
         cPly.updateName();
+
+        // Update follower units to new team
+        for(Unit u: cPly.followers){
+            u.team(ply.team());
+        }
     }
 
     private float cartesianDistance(float x, float y, float cx, float cy){

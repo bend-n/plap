@@ -27,8 +27,8 @@ public class PlagueData {
         prestiges.add(new PrestigeLevel("Gamma*2", UnitTypes.gamma, 1));
         prestiges.add(new PrestigeLevel("Poly", UnitTypes.poly, 2));
         prestiges.add(new PrestigeLevel("Poly*2", UnitTypes.poly, 1));
-        prestiges.add(new PrestigeLevel("Mega", UnitTypes.mega, 2));
-        prestiges.add(new PrestigeLevel("Mega*2", UnitTypes.mega, 1));
+        // prestiges.add(new PrestigeLevel("Mega", UnitTypes.mega, 2));
+        // prestiges.add(new PrestigeLevel("Mega*2", UnitTypes.mega, 1));
     }
 
 

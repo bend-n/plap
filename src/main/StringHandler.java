@@ -16,6 +16,6 @@ public class StringHandler {
     }
 
     public static String determinePrestige(int prestige){
-        return "\uF82C[gold]" + prestige;
+        return prestige > 0 ? "\uF82C[gold]" + prestige : "";
     }
 }
