@@ -303,7 +303,7 @@ public class PlagueMain extends Plugin {
             Player ply = event.player;
             CustomPlayer cPly = uuidMapping.get(ply.uuid());
 
-            spawnPlayerUnits(cPly, ply);
+            if(cPly != null) spawnPlayerUnits(cPly, ply);
         });
 
         Events.on(EventType.UnitControlEvent.class, event ->{
