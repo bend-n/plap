@@ -149,7 +149,7 @@ public class PlagueMain extends Plugin {
         netServer.admins.addActionFilter((action) -> {
             if(action.player != null && action.tile != null){
                 if(cartesianDistance(action.tile.x, action.tile.y,
-                        plagueCore[0], plagueCore[1]) < world.height()/3){
+                        plagueCore[0], plagueCore[1]) < world.height()/2.8){
                     if((action.player.team() != Team.purple && action.block == Blocks.vault)
                         || action.player.team() == Team.blue) {
                         action.player.sendMessage("[scarlet]Cannot place core/vault that close to plague!");
