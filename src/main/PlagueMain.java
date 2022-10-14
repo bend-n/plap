@@ -149,7 +149,7 @@ public class PlagueMain extends Plugin {
         netServer.admins.addActionFilter((action) -> {
             if(action.player != null && action.tile != null){
                 if(cartesianDistance(action.tile.x, action.tile.y,
-                        plagueCore[0], plagueCore[1]) < world.height()/2.75){
+                        plagueCore[0], plagueCore[1]) < world.height()/3){
                     if((action.player.team() != Team.purple && action.block == Blocks.vault)
                         || action.player.team() == Team.blue) {
                         action.player.sendMessage("[scarlet]Cannot place core/vault that close to plague!");
@@ -467,8 +467,9 @@ public class PlagueMain extends Plugin {
 
                 for(CustomPlayer cPly : teams.get(Team.purple).players){
                     if(cPly.connected){
-                        int addXp = 300 * (cPly.player.donatorLevel*2 + 1);
-                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors");
+                        int addXp = 300 * (cPly.player.donatorLevel*2 + 1) * (hasWon ? 2 : 1);
+                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors" +
+                                (hasWon ? " [gold]before the win time": ""));
                     }
                 }
 

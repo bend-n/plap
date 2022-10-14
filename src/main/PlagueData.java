@@ -25,10 +25,10 @@ public class PlagueData {
         prestiges.add(new PrestigeLevel("Beta*2", UnitTypes.beta, 1));
         prestiges.add(new PrestigeLevel("Gamma", UnitTypes.gamma, 2));
         prestiges.add(new PrestigeLevel("Gamma*2", UnitTypes.gamma, 1));
-        prestiges.add(new PrestigeLevel("Poly", UnitTypes.poly, 2));
-        prestiges.add(new PrestigeLevel("Poly*2", UnitTypes.poly, 1));
-        // prestiges.add(new PrestigeLevel("Mega", UnitTypes.mega, 2));
-        // prestiges.add(new PrestigeLevel("Mega*2", UnitTypes.mega, 1));
+        // prestiges.add(new PrestigeLevel("Poly", UnitTypes.poly, 2));
+        // prestiges.add(new PrestigeLevel("Poly*2", UnitTypes.poly, 1));
+        prestiges.add(new PrestigeLevel("Mega", UnitTypes.mega, 2));
+        prestiges.add(new PrestigeLevel("Mega*2", UnitTypes.mega, 1));
     }
 
 
@@ -52,8 +52,8 @@ public class PlagueData {
 
     public static final Seq<ItemStack> survivorLoadout;
     static {
-        survivorLoadout = ItemStack.list(Items.copper, 4000, Items.lead, 4000,
-                Items.graphite, 2000, Items.titanium, 2000, Items.silicon, 1000, Items.metaglass, 1000);
+        survivorLoadout = ItemStack.list(Items.copper, 2000, Items.lead, 2000,
+                Items.graphite, 1000, Items.titanium, 1000, Items.silicon, 500, Items.metaglass, 500);
     }
 
     public static final Seq<ItemStack> plagueLoadout;
