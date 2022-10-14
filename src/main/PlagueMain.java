@@ -467,9 +467,9 @@ public class PlagueMain extends Plugin {
 
                 for(CustomPlayer cPly : teams.get(Team.purple).players){
                     if(cPly.connected){
-                        int addXp = 300 * (cPly.player.donatorLevel*2 + 1) * (hasWon ? 2 : 1);
+                        int addXp = 300 * (cPly.player.donatorLevel*2 + 1) * (!hasWon ? 2 : 1);
                         cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors" +
-                                (hasWon ? " [gold]before the win time": ""));
+                                (!hasWon ? " [gold]before the win time": ""));
                     }
                 }
 
