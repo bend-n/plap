@@ -456,6 +456,12 @@ public class PlagueMain extends Plugin {
             if(event.tile.block() instanceof CoreBlock && event.tile.team().cores().size == 1){
                 Team deadTeam = event.tile.team();
                 Seq<CustomPlayer> winners = new Seq<CustomPlayer>();
+                Log.info("Dead team to infect: " + deadTeam);
+                if(!teams.containsKey(deadTeam)){
+                    Call.sendMessage("Welp that's not supposed to happen... Let [purple]Recessive[white] know what just happened and what caused this" +
+                            " message to appear");
+                    return;
+                }
                 for(CustomPlayer cPly : teams.get(deadTeam).players){
                     if(teams.size() == 2 && cPly.connected){
                         winners.add(cPly);
