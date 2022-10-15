@@ -1273,6 +1273,7 @@ public class PlagueMain extends Plugin {
             netServer.sendWorldData(player);
             player.team(Team.blue);
             player.name = uuidMapping.get(player.uuid()).rawName;
+            uuidMapping.get(player.uuid()).buildScore = 0;
 
             loadPlayer(player);
         }
