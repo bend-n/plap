@@ -862,6 +862,8 @@ public class PlagueMain extends Plugin {
     }
 
     void infect(CustomPlayer cPly, boolean remove){
+        cPly.buildScore = 0;
+        cPly.player.sendMessage("[accent]Your contribution has been reset after being infected!");
         if(cPly.player.team() != Team.blue && remove){
             PlagueTeam cTeam = teams.get(cPly.player.team());
             if(cTeam.players.size() <= 1) killTiles(cPly.player.team());

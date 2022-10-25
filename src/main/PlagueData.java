@@ -52,8 +52,8 @@ public class PlagueData {
 
     public static final Seq<ItemStack> survivorLoadout;
     static {
-        survivorLoadout = ItemStack.list(Items.copper, 2000, Items.lead, 2000,
-                Items.graphite, 1000, Items.titanium, 1000, Items.silicon, 500, Items.metaglass, 500);
+        survivorLoadout = ItemStack.list(Items.copper, 3600, Items.lead, 3600,
+                Items.graphite, 1800, Items.titanium, 1800, Items.silicon, 900, Items.metaglass, 900);
     }
 
     public static final Seq<ItemStack> plagueLoadout;
