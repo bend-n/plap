@@ -60,12 +60,14 @@ public class CustomPlayer {
         }
         if(plagueXp){
             if (plagueBuildScore < 7500){
-                player.sendMessage("[accent]You must contribute more to [scarlet]Plague[accent] to receive XP!");
+                player.sendMessage("[accent]You must contribute more to [scarlet]Plague[accent] to receive XP!" +
+                        " (" + plagueBuildScore + "/7500)");
                 return;
             }
         }else{
-            if (plagueBuildScore < 7500){
-                player.sendMessage("[accent]You must contribute more to [olive]Survivors[accent] to receive XP!");
+            if (survivorBuildScore < 7500){
+                player.sendMessage("[accent]You must contribute more to [olive]Survivors[accent] to receive XP!" +
+                        " (" + survivorBuildScore + "/7500)");
                 return;
             }
         }

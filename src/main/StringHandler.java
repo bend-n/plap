@@ -12,7 +12,11 @@ public class StringHandler {
             case 6: return "[accent]<[white]\uF7BE" + ((xp / 5000) % 3 + 1) + "[accent]>";
             case 7: return "[accent]<[gold]\uF85F" + ((xp / 5000) % 3 + 1) + "[accent]>";
         }
-        return "[accent]<[green]Horde\u00A0slayer[accent]>[white]";
+        switch(xp / 1000000){
+            case 0: return "[accent]<[green]Horde\u00A0slayer[accent]>[white]";
+            case 1: return "[accent]<[green]Horde\u00A0[gold]eradicator[accent]>[white]";
+        }
+        return "[accent]<[gray]No life[accent]>[white]";
     }
 
     public static String determinePrestige(int prestige){
