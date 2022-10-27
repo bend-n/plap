@@ -445,7 +445,7 @@ public class PlagueMain extends Plugin {
 
             CustomPlayer cPly = uuidMapping.get(event.unit.getPlayer().uuid());
             if(!event.breaking){
-                if(cPly.team == Team.purple){
+                if(event.unit.getPlayer().team() == Team.purple){
                     cPly.plagueBuildScore += event.tile.block().buildCost;
                 } else{
                     cPly.survivorBuildScore += event.tile.block().buildCost;
