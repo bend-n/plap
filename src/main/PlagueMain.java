@@ -236,7 +236,7 @@ public class PlagueMain extends Plugin {
                         cPly.wins++;
                         player.sendMessage("[gold]+1 wins[accent] for a total of [gold]" + cPly.monthWins + "[accent] wins!");
                         int addXp = 750 * (cPly.player.donatorLevel*2 + 1);
-                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for winning");
+                        cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for winning");
                     }
 
                 });
@@ -280,7 +280,7 @@ public class PlagueMain extends Plugin {
                     if(player.team() != Team.purple){
                         CustomPlayer cPly = uuidMapping.get(player.uuid());
                         int addXp = 50 * (cPly.player.donatorLevel*2 + 1);
-                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving");
+                        cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving");
                     }
 
                 });
@@ -445,7 +445,12 @@ public class PlagueMain extends Plugin {
 
             CustomPlayer cPly = uuidMapping.get(event.unit.getPlayer().uuid());
             if(!event.breaking){
-                cPly.buildScore += event.tile.block().buildCost;
+                if(cPly.team == Team.purple){
+                    cPly.plagueBuildScore += event.tile.block().buildCost;
+                } else{
+                    cPly.survivorBuildScore += event.tile.block().buildCost;
+                }
+
             }
 
 
@@ -474,7 +479,7 @@ public class PlagueMain extends Plugin {
                 for(CustomPlayer cPly : teams.get(Team.purple).players){
                     if(cPly.connected){
                         int addXp = 200 * (cPly.player.donatorLevel*2 + 1) * (!hasWon ? 2 : 1);
-                        cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors" +
+                        cPly.addXP(addXp, true, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors" +
                                 (!hasWon ? " [gold]before the win time": ""));
                     }
                 }
@@ -862,7 +867,6 @@ public class PlagueMain extends Plugin {
     }
 
     void infect(CustomPlayer cPly, boolean remove){
-        cPly.buildScore = 0;
         cPly.player.sendMessage("[accent]Your contribution has been reset after being infected!");
         if(cPly.player.team() != Team.blue && remove){
             PlagueTeam cTeam = teams.get(cPly.player.team());
@@ -1055,10 +1059,10 @@ public class PlagueMain extends Plugin {
                     "[accent]Survive time: [scarlet]" + timeNow/60 + "[accent] minutes and [scarlet]" +
                     timeNow % 60 + "[accent] seconds.");
             int addXp = 500 * (cPly.player.donatorLevel*2 + 1);
-            cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving the longest");
+            cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving the longest");
             if(newRecord){
                 addXp = 2000 * (cPly.player.donatorLevel*2 + 1);
-                cPly.addXP(addXp, "[accent]+[scarlet]" + addXp + "xp[accent] for setting a record");
+                cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for setting a record");
             }
 
         }
@@ -1273,9 +1277,7 @@ public class PlagueMain extends Plugin {
         for(Player player : players){
             Call.worldDataBegin(player.con);
             netServer.sendWorldData(player);
-            player.team(Team.blue);
-            player.name = uuidMapping.get(player.uuid()).rawName;
-            uuidMapping.get(player.uuid()).buildScore = 0;
+            uuidMapping.get(player.uuid()).reset();
 
             loadPlayer(player);
         }

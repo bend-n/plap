@@ -33,7 +33,7 @@ public class CustomPlayer {
         put(Team.blue, "[royal]");
     }};
 
-    public int buildScore = 0;
+    public int plagueBuildScore = 0, survivorBuildScore = 0;
 
     public boolean connected = true;
 
@@ -42,18 +42,32 @@ public class CustomPlayer {
         this.rawName = player.name;
     }
 
+    public void reset(){
+        plagueBuildScore = 0;
+        survivorBuildScore = 0;
+        player.name = rawName;
+        player.team(Team.blue);
+    }
+
     public void updateName(){
         player.name = StringHandler.determinePrestige(prestige) + StringHandler.determineRank(xp) +
                 colorMapping.getOrDefault(player.team(), "[olive]") + "\u00A0" + rawName;
     }
 
-    public void addXP(int add, String message){
+    public void addXP(int add, boolean plagueXp, String message){
         if(!connected){
             return;
         }
-        if(buildScore < 7500){
-            player.sendMessage("[accent]You must contribute more to receive XP!");
-            return;
+        if(plagueXp){
+            if (plagueBuildScore < 7500){
+                player.sendMessage("[accent]You must contribute more to [scarlet]Plague[accent] to receive XP!");
+                return;
+            }
+        }else{
+            if (plagueBuildScore < 7500){
+                player.sendMessage("[accent]You must contribute more to [olive]Survivors[accent] to receive XP!");
+                return;
+            }
         }
         xp += add;
         player.sendMessage(message);
