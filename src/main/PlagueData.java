@@ -19,16 +19,23 @@ public class PlagueData {
     public static final List<PrestigeLevel> prestiges;
     static{
         prestiges = new ArrayList<>();
-        prestiges.add(new PrestigeLevel("Alpha", UnitTypes.alpha, 2));
-        prestiges.add(new PrestigeLevel("Alpha*2", UnitTypes.alpha, 1));
-        prestiges.add(new PrestigeLevel("Beta", UnitTypes.beta, 2));
-        prestiges.add(new PrestigeLevel("Beta*2", UnitTypes.beta, 1));
-        prestiges.add(new PrestigeLevel("Gamma", UnitTypes.gamma, 2));
-        prestiges.add(new PrestigeLevel("Gamma*2", UnitTypes.gamma, 1));
-        // prestiges.add(new PrestigeLevel("Poly", UnitTypes.poly, 2));
-        // prestiges.add(new PrestigeLevel("Poly*2", UnitTypes.poly, 1));
-        prestiges.add(new PrestigeLevel("Mega", UnitTypes.mega, 2));
-        prestiges.add(new PrestigeLevel("Mega*2", UnitTypes.mega, 1));
+        prestiges.add(new PrestigeLevel("Alpha", UnitTypes.alpha, 1));
+        prestiges.add(new PrestigeLevel("Beta 1", UnitTypes.beta, 4));
+        prestiges.add(new PrestigeLevel("Beta 2", UnitTypes.beta, 3));
+        prestiges.add(new PrestigeLevel("Beta 3", UnitTypes.beta, 2));
+        prestiges.add(new PrestigeLevel("Beta 4", UnitTypes.beta, 1));
+        prestiges.add(new PrestigeLevel("Poly 1", UnitTypes.poly, 4));
+        prestiges.add(new PrestigeLevel("Poly 2", UnitTypes.poly, 3));
+        prestiges.add(new PrestigeLevel("Poly 3", UnitTypes.poly, 2));
+        prestiges.add(new PrestigeLevel("Poly 4", UnitTypes.poly, 1));
+        prestiges.add(new PrestigeLevel("Gamma 1", UnitTypes.gamma, 4));
+        prestiges.add(new PrestigeLevel("Gamma 2", UnitTypes.gamma, 3));
+        prestiges.add(new PrestigeLevel("Gamma 3", UnitTypes.gamma, 2));
+        prestiges.add(new PrestigeLevel("Gamma 4", UnitTypes.gamma, 1));
+        prestiges.add(new PrestigeLevel("Mega 1", UnitTypes.mega, 4));
+        prestiges.add(new PrestigeLevel("Mega 2", UnitTypes.mega, 3));
+        prestiges.add(new PrestigeLevel("Mega 3", UnitTypes.mega, 2));
+        prestiges.add(new PrestigeLevel("Mega 4", UnitTypes.mega, 1));
     }
 
 
