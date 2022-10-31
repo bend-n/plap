@@ -19,15 +19,15 @@ public class PlagueData {
     public static final List<PrestigeLevel> prestiges;
     static{
         prestiges = new ArrayList<>();
-        prestiges.add(new PrestigeLevel("Alpha", UnitTypes.alpha, 1));
+        prestiges.add(new PrestigeLevel("Poly", UnitTypes.poly, 1));
+        prestiges.add(new PrestigeLevel("Alpha 1", UnitTypes.alpha, 4));
+        prestiges.add(new PrestigeLevel("Alpha 2", UnitTypes.alpha, 3));
+        prestiges.add(new PrestigeLevel("Alpha 3", UnitTypes.alpha, 2));
+        prestiges.add(new PrestigeLevel("Alpha 4", UnitTypes.alpha, 1));
         prestiges.add(new PrestigeLevel("Beta 1", UnitTypes.beta, 4));
         prestiges.add(new PrestigeLevel("Beta 2", UnitTypes.beta, 3));
         prestiges.add(new PrestigeLevel("Beta 3", UnitTypes.beta, 2));
         prestiges.add(new PrestigeLevel("Beta 4", UnitTypes.beta, 1));
-        prestiges.add(new PrestigeLevel("Poly 1", UnitTypes.poly, 4));
-        prestiges.add(new PrestigeLevel("Poly 2", UnitTypes.poly, 3));
-        prestiges.add(new PrestigeLevel("Poly 3", UnitTypes.poly, 2));
-        prestiges.add(new PrestigeLevel("Poly 4", UnitTypes.poly, 1));
         prestiges.add(new PrestigeLevel("Gamma 1", UnitTypes.gamma, 4));
         prestiges.add(new PrestigeLevel("Gamma 2", UnitTypes.gamma, 3));
         prestiges.add(new PrestigeLevel("Gamma 3", UnitTypes.gamma, 2));
