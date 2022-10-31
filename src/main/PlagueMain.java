@@ -611,7 +611,7 @@ public class PlagueMain extends Plugin {
             }
 
             cPly.prestige++;
-            cPly.xp = 0;
+            cPly.xp -= (cPly.rank() * 15000);
             cPly.updateName();
 
             player.sendMessage("[gold]You gained 1 prestige point for a total of [scarlet]" + cPly.prestige);
