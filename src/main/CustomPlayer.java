@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class CustomPlayer {
 
+    private static int contribRequired = 1000;
     protected Player player;
     public String rawName;
     public Team team;
@@ -59,15 +60,15 @@ public class CustomPlayer {
             return;
         }
         if(plagueXp){
-            if (plagueBuildScore < 7500){
+            if (plagueBuildScore < contribRequired){
                 player.sendMessage("[accent]You must contribute more to [scarlet]Plague[accent] to receive XP!" +
-                        " (" + plagueBuildScore + "/7500)");
+                        " (" + plagueBuildScore + "/" + contribRequired + ")");
                 return;
             }
         }else{
-            if (survivorBuildScore < 7500){
+            if (survivorBuildScore < contribRequired){
                 player.sendMessage("[accent]You must contribute more to [olive]Survivors[accent] to receive XP!" +
-                        " (" + survivorBuildScore + "/7500)");
+                        " (" + survivorBuildScore + "/" + contribRequired + ")");
                 return;
             }
         }
