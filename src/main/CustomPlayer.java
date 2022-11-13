@@ -12,8 +12,12 @@ import java.util.Map;
 
 public class CustomPlayer {
 
-    private static int contribRequired = 1000;
+
     protected Player player;
+    public int playTime;
+    public int donatorLevel;
+
+    private static int contribRequired = 1000;
     public String rawName;
     public Team team;
     public int xp;
@@ -28,9 +32,11 @@ public class CustomPlayer {
     public int controlledT5;
     public int bannedT5 = -1000;
 
+
+
     private Map<Team, String> colorMapping = new HashMap<Team, String>()
     {{
-        put(Team.purple, "[scarlet]");
+        put(Team.malis, "[scarlet]");
         put(Team.blue, "[royal]");
     }};
 
