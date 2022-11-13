@@ -36,7 +36,7 @@ public class CustomPlayer {
 
     private Map<Team, String> colorMapping = new HashMap<Team, String>()
     {{
-        put(Team.crux, "[scarlet]");
+        put(Team.malis, "[scarlet]");
         put(Team.blue, "[royal]");
     }};
 
