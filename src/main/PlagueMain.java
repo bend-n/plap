@@ -1,6 +1,5 @@
 package main;
 
-import aaShared.CustomEvents;
 import arc.*;
 import arc.func.Boolf;
 import arc.func.Cons;
@@ -134,13 +133,13 @@ public class PlagueMain extends Plugin {
         netServer.assigner = (player, players) -> {
             if(uuidMapping.containsKey(player.uuid())){
                 Team team = uuidMapping.get(player.uuid()).team;
-                if(team == Team.blue && !pregame) return Team.malis;
+                if(team == Team.blue && !pregame) return Team.crux;
                 return team;
             }
             if(pregame){
                 return Team.blue;
             }else{
-                return Team.malis;
+                return Team.crux;
             }
         };
 
@@ -148,7 +147,7 @@ public class PlagueMain extends Plugin {
             if(action.player != null && action.tile != null){
                 if(cartesianDistance(action.tile.x, action.tile.y,
                         plagueCore[0], plagueCore[1]) < world.height()/2.8){
-                    if((action.player.team() != Team.malis && action.block == Blocks.vault)
+                    if((action.player.team() != Team.crux && action.block == Blocks.vault)
                         || action.player.team() == Team.blue) {
                         action.player.sendMessage("[scarlet]Cannot place core/vault that close to plague!");
                         return false;
@@ -159,11 +158,11 @@ public class PlagueMain extends Plugin {
                 }
 
                 if(action.block != null && PlagueData.survivorBanned.contains(action.block)
-                        && action.player.team() != Team.malis && action.player.team() != Team.blue){
+                        && action.player.team() != Team.crux && action.player.team() != Team.blue){
                     return false;
                 }
                 if(action.block != null && PlagueData.plagueBanned.contains(action.block)
-                        && action.player.team() == Team.malis){
+                        && action.player.team() == Team.crux){
                     return false;
                 }
 
@@ -223,7 +222,7 @@ public class PlagueMain extends Plugin {
             if(!gameover && !hasWon && seconds > winTime * 60){
                 hasWon = true;
                 Groups.player.each((player) -> {
-                    if(player.team() == Team.malis){
+                    if(player.team() == Team.crux){
                         Call.infoMessage(player.con, "The survivors have evacuated all civilians and launched the inhibitors! " +
                                 "The plague is super powerful now, finish what's left of the survivors!");
                     }else{
@@ -275,7 +274,7 @@ public class PlagueMain extends Plugin {
                         "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
 
                 Groups.player.each((player) -> {
-                    if(player.team() != Team.malis){
+                    if(player.team() != Team.crux){
                         CustomPlayer cPly = uuidMapping.get(player.uuid());
                         int addXp = 50 * (cPly.donatorLevel*2 + 1);
                         cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving");
@@ -351,7 +350,7 @@ public class PlagueMain extends Plugin {
 
         Events.on(EventType.UnitCreateEvent.class, event -> {
 
-            if(event.unit.type == UnitTypes.horizon && event.unit.team != Team.malis) {
+            if(event.unit.type == UnitTypes.horizon && event.unit.team != Team.crux) {
                 // Let players know they can't build this unit
                 Call.label("Survivors can't build horizons!",
                         5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
@@ -360,8 +359,8 @@ public class PlagueMain extends Plugin {
             }
         });
 
-        Events.on(CustomEvents.PlayerJoinSecondary.class, event ->{
-            loadPlayer((Player) event.player);
+        Events.on(EventType.PlayerJoinSecondary.class, event ->{
+            loadPlayer(event.player);
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
@@ -381,7 +380,7 @@ public class PlagueMain extends Plugin {
                 if(Build.validPlace(Blocks.spectre, event.team, event.tile.x, event.tile.y, 0) && !event.breaking){
                     Team chosenTeam = null;
                     for(Teams.TeamData t : state.teams.getActive()){
-                        if(t.team != Team.malis){
+                        if(t.team != Team.crux){
                             for(CoreBlock.CoreBuild core : t.cores){
                                 if(cartesianDistance(event.tile.x, event.tile.y, core.tile.x, core.tile.y) < 150){
                                     chosenTeam = t.team;
@@ -434,14 +433,14 @@ public class PlagueMain extends Plugin {
             if(event.unit.getPlayer() == null){
                 return;
             }
-            if(event.team == Team.malis && cartesianDistance(event.tile.x, event.tile.y,
+            if(event.team == Team.crux && cartesianDistance(event.tile.x, event.tile.y,
                     plagueCore[0], plagueCore[1]) < world.height()/10){
                 event.tile.build.indestructible = true;
             }
 
             CustomPlayer cPly = uuidMapping.get(event.unit.getPlayer().uuid());
             if(!event.breaking){
-                if(event.unit.getPlayer().team() == Team.malis){
+                if(event.unit.getPlayer().team() == Team.crux){
                     cPly.plagueBuildScore += event.tile.block().buildCost;
                 } else{
                     cPly.survivorBuildScore += event.tile.block().buildCost;
@@ -472,7 +471,7 @@ public class PlagueMain extends Plugin {
 
                 killTiles(deadTeam);
 
-                for(CustomPlayer cPly : teams.get(Team.malis).players){
+                for(CustomPlayer cPly : teams.get(Team.crux).players){
                     if(cPly.connected){
                         int addXp = 200 * (cPly.donatorLevel*2 + 1) * (!hasWon ? 2 : 1);
                         cPly.addXP(addXp, true, "[accent]+[scarlet]" + addXp + "xp[accent] for infecting survivors" +
@@ -489,21 +488,21 @@ public class PlagueMain extends Plugin {
         });
 
         Events.on(EventType.TapEvent.class, event ->{
-            if(event.tile.block() == Blocks.vault && event.tile.team() != Team.malis && event.player.team() == event.tile.team()){
+            if(event.tile.block() == Blocks.vault && event.tile.team() != Team.crux && event.player.team() == event.tile.team()){
                 if(event.tile.build.items.has(Items.thorium, 997)){
                     event.tile.build.tile.setNet(Blocks.coreShard, event.tile.team(), 0);
                 }
             }
         });
 
-        Events.on(CustomEvents.NewName.class, event ->{
+        Events.on(EventType.NewName.class, event ->{
             Player ply = uuidMapping.get(event.uuid).player;
             CustomPlayer cPly = uuidMapping.get(event.uuid);
             cPly.rawName = ply.name;
             ply.name = StringHandler.determinePrestige(cPly.prestige) + StringHandler.determineRank(cPly.xp) + "\u00A0" + ply.name;
         });
 
-        Events.on(CustomEvents.HudToggle.class, event ->{
+        Events.on(EventType.HudToggle.class, event ->{
             CustomPlayer cPly = uuidMapping.get(event.uuid);
             cPly.hudEnabled = event.enabled;
         });
@@ -569,7 +568,7 @@ public class PlagueMain extends Plugin {
         });
 
         handler.<Player>register("infect", "Infect yourself", (args, player) -> {
-            if(player.team() == Team.malis){
+            if(player.team() == Team.crux){
                 player.sendMessage("[accent]Already infected!");
                 return;
             }
@@ -644,7 +643,7 @@ public class PlagueMain extends Plugin {
         });
 
         handler.<Player>register("teamlock", "Toggles locking team, preventing other players from joining your team (leader only)", (args, player) -> {
-            if(player.team() == Team.blue || player.team() == Team.malis){
+            if(player.team() == Team.blue || player.team() == Team.crux){
                 player.sendMessage(("[accent]You can only lock a team as a survivor!"));
                 return;
             }
@@ -672,7 +671,7 @@ public class PlagueMain extends Plugin {
 
         handler.<Player>register("teamkick", "[id/name]", "Kick a player from your team (leader only)", (args, player) -> {
 
-            if(player.team() == Team.blue || player.team() == Team.malis){
+            if(player.team() == Team.blue || player.team() == Team.crux){
                 player.sendMessage(("[accent]You can only kick players from a team as a survivor!"));
                 return;
             }
@@ -694,7 +693,7 @@ public class PlagueMain extends Plugin {
                             other.rawName.equalsIgnoreCase(args[0])){
                         if(other.player == player) continue;
 
-                        Team teamToSet = pregame ? Team.blue : Team.malis;
+                        Team teamToSet = pregame ? Team.blue : Team.crux;
 
                         other.team = teamToSet;
                         other.player.team(teamToSet);
@@ -722,7 +721,7 @@ public class PlagueMain extends Plugin {
         });
 
         handler.<Player>register("teamleave", "Leave your current team", (args, player) -> {
-            if(player.team() == Team.blue || player.team() == Team.malis){
+            if(player.team() == Team.blue || player.team() == Team.crux){
                 player.sendMessage(("[accent]Can only leave team if you are survivor!"));
                 return;
             }
@@ -866,11 +865,11 @@ public class PlagueMain extends Plugin {
             cTeam.removePlayer(cPly);
         }
         Call.sendMessage("[accent]" + cPly.player.name + "[white] was [red]infected[white]!");
-        teams.get(Team.malis).addPlayer(cPly);
+        teams.get(Team.crux).addPlayer(cPly);
 
 
         if(cPly.connected){
-            cPly.player.team(Team.malis);
+            cPly.player.team(Team.crux);
             cPly.player.clearUnit();
             updatePlayer(cPly.player);
         }
@@ -934,6 +933,7 @@ public class PlagueMain extends Plugin {
 
 
         if(player.team() == Team.blue){
+            Log.info("Spawning " + player.name() + " at plague core");
             CoreBlock.playerSpawn(world.tile(plagueCore[0], plagueCore[1]), player);
         }
 
@@ -971,7 +971,7 @@ public class PlagueMain extends Plugin {
 
     private void updatePlayer(Player ply){
 
-        if(ply.team() == Team.malis){
+        if(ply.team() == Team.crux){
             Rules tempRules = rules.copy();
             tempRules.bannedBlocks = PlagueData.plagueBanned;
             for(int i=0; i<5; i++){ // Just making sure the packet gets there
@@ -1059,7 +1059,7 @@ public class PlagueMain extends Plugin {
 
         }
 
-        for(CustomPlayer cPly : teams.get(Team.malis).players){
+        for(CustomPlayer cPly : teams.get(Team.crux).players){
             if(!winners.contains(cPly)){
                 Call.infoMessage(cPly.player.con, "[accent]Game over!\nAll survivors have been infected. Loading new map...");
             }
@@ -1091,7 +1091,7 @@ public class PlagueMain extends Plugin {
                     new String[]{"survivorRecord", "avgSurvived", "plays"},
                     new Object[]{finalSurvivorRecord, finalAvgSurvived, finalPlays});
 
-            Events.fire(new CustomEvents.GameOver());
+            Events.fire(new EventType.GameOver());
 
             Log.info("Game ended successfully.");
             mapReset();
@@ -1210,12 +1210,10 @@ public class PlagueMain extends Plugin {
         world.loadMap(map);
         loadedMap = state.map;
 
-
-
-        Tile tile = state.teams.cores(Team.malis).find(build -> build.block == Blocks.coreNucleus).tile;
+        Tile tile = state.teams.cores(Team.crux).find(build -> build.block == Blocks.coreNucleus).tile;
 
         // Make cores and power source indestructible
-        state.teams.cores(Team.malis).each(coreBuild -> coreBuild.indestructible = true);
+        state.teams.cores(Team.crux).each(coreBuild -> coreBuild.indestructible = true);
         for(int x = 0; x < world.width(); x++){
             for(int y = 0; y < world.height(); y++){
                 Tile t = world.tile(x, y);
@@ -1262,7 +1260,7 @@ public class PlagueMain extends Plugin {
 
         tile.build.items.clear();
 
-        teams.put(Team.malis, new PlagueTeam(Team.malis));
+        teams.put(Team.crux, new PlagueTeam(Team.crux));
         teams.put(Team.blue, new PlagueTeam(Team.blue));
         logic.play();
 
@@ -1273,6 +1271,8 @@ public class PlagueMain extends Plugin {
 
             loadPlayer(player);
         }
+
+        Log.info("Done");
 
     }
 }
