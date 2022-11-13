@@ -37,6 +37,7 @@ import mindustry.world.blocks.sandbox.PowerSource;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.units.Reconstructor;
 import mindustry.world.blocks.units.UnitFactory;
+import mindustry.world.meta.Env;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -49,6 +50,7 @@ import java.util.*;
 import java.util.prefs.Preferences;
 
 import static mindustry.Vars.*;
+import static mindustry.content.Planets.serpulo;
 
 public class PlagueMain extends Plugin {
 
@@ -172,7 +174,7 @@ public class PlagueMain extends Plugin {
         });
 
 
-        Events.on(EventType.Trigger.class, event ->{
+        Events.run(Trigger.update, () ->{
             if(resetting || firstRun) return;
             // Spawn player in core if they aren't
             if(pregame){
@@ -1231,7 +1233,10 @@ public class PlagueMain extends Plugin {
 
 
 
-        rules.enemyCoreBuildRadius = loadedMap.rules().enemyCoreBuildRadius;
+        rules.enemyCoreBuildRadius = 75;
+        rules.hiddenBuildItems.addAll(Items.erekirItems);
+        rules.hiddenBuildItems.removeAll(Items.serpuloItems);
+        rules.hideBannedBlocks = true;
         state.rules = rules.copy();
 
 
