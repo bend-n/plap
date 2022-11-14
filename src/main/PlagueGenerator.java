@@ -37,15 +37,17 @@ public class PlagueGenerator{
         GenerateInput in = new GenerateInput();
         Seq<GenerateFilter> ores = new Seq<>();
         maps.addDefaultOres(ores);
-        ores.insert(0, new OreFilter() {{
-            ore = Blocks.oreScrap;
-        }});
+
 
         int i = 0;
         for(GenerateFilter o : ores){
             ((OreFilter) o).threshold -= 0.05f;
             o.seed = i++;
         }
+
+        ores.insert(0, new OreFilter() {{
+            ore = Blocks.oreScrap;
+        }});
 
 
         in.floor = (Floor) Blocks.darksand;
