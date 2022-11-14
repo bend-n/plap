@@ -39,6 +39,7 @@ import mindustry.world.blocks.units.Reconstructor;
 import mindustry.world.blocks.units.UnitFactory;
 import mindustry.world.meta.Env;
 
+import java.awt.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -802,21 +803,7 @@ public class PlagueMain extends Plugin {
 
         additiveNoFlare = ((Reconstructor) Blocks.additiveReconstructor).upgrades.copy();
 
-        /*((ItemTurret) Blocks.foreshadow).ammo(
-                Items.surgeAlloy, new PointBulletType(){{
-                    shootEffect = Fx.instShoot;
-                    hitEffect = Fx.instHit;
-                    smokeEffect = Fx.smokeCloud;
-                    trailEffect = Fx.instTrail;
-                    despawnEffect = Fx.instBomb;
-                    trailSpacing = 20f;
-                    damage = 1350;
-                    buildingDamageMultiplier = 0f;
-                    speed = 500f;
-                    hitShake = 6f;
-                    ammoMultiplier = 1f;
-                }}
-        );*/
+        ((ItemTurret) Blocks.foreshadow).ammoTypes.get(Items.surgeAlloy).buildingDamageMultiplier = 0;
 
         for(int i = 0; i < maps.customMaps().size; i++){
             rotation.add(i);
@@ -935,7 +922,6 @@ public class PlagueMain extends Plugin {
 
 
         if(player.team() == Team.blue){
-            Log.info("Spawning " + player.name() + " at plague core");
             CoreBlock.playerSpawn(world.tile(plagueCore[0], plagueCore[1]), player);
         }
 
