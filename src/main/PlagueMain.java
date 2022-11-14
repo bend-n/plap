@@ -1232,8 +1232,7 @@ public class PlagueMain extends Plugin {
         world.endMapLoad();
 
 
-
-        rules.enemyCoreBuildRadius = 75;
+        rules.enemyCoreBuildRadius = 75 * 8;
         rules.hiddenBuildItems.addAll(Items.erekirItems);
         rules.hiddenBuildItems.removeAll(Items.serpuloItems);
         rules.hideBannedBlocks = true;
