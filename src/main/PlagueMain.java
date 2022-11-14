@@ -235,7 +235,7 @@ public class PlagueMain extends Plugin {
                         cPly.monthWins++;
                         cPly.wins++;
                         player.sendMessage("[gold]+1 wins[accent] for a total of [gold]" + cPly.monthWins + "[accent] wins!");
-                        int addXp = 750 * (cPly.donatorLevel*2 + 1);
+                        int addXp = 1000 * (cPly.donatorLevel*2 + 1);
                         cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for winning");
                     }
 
@@ -1038,7 +1038,7 @@ public class PlagueMain extends Plugin {
                     (newRecord ? "    [gold]New record!\n" : "") +
                     "[accent]Survive time: [scarlet]" + timeNow/60 + "[accent] minutes and [scarlet]" +
                     timeNow % 60 + "[accent] seconds.");
-            int addXp = 500 * (cPly.donatorLevel*2 + 1);
+            int addXp = 1000 * (cPly.donatorLevel*2 + 1);
             cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for surviving the longest");
             if(newRecord){
                 addXp = 2000 * (cPly.donatorLevel*2 + 1);
