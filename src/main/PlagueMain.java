@@ -364,6 +364,9 @@ public class PlagueMain extends Plugin {
 
         Events.on(EventType.PlayerJoinSecondary.class, event ->{
             loadPlayer(event.player);
+            CustomPlayer cPly = uuidMapping.get(event.player.uuid());
+            cPly.playTime = event.playTime;
+            cPly.donatorLevel = event.donatorLevel;
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
