@@ -109,6 +109,8 @@ public class PlagueMain extends Plugin {
 
     private final DBInterface db = new DBInterface();
 
+    private boolean isSerpulo = true;
+
     private boolean pregame;
     private boolean gameover;
     private boolean hasWon;
@@ -383,7 +385,7 @@ public class PlagueMain extends Plugin {
 
             if(event.team == Team.blue){
                 event.tile.removeNet();
-                if(Build.validPlace(Blocks.spectre, event.team, event.tile.x, event.tile.y, 0) && !event.breaking){
+                if(Build.validPlace(isSerpulo ? Blocks.spectre : Blocks.malign, event.team, event.tile.x, event.tile.y, 0) && !event.breaking){
                     Team chosenTeam = null;
                     for(Teams.TeamData t : state.teams.getActive()){
                         if(t.team != Team.malis){
@@ -418,10 +420,10 @@ public class PlagueMain extends Plugin {
                     uuidMapping.get(player.uuid()).team = chosenTeam;
                     updatePlayer(player);
 
-                    event.tile.setNet(Blocks.coreFoundation, chosenTeam, 0);
+                    event.tile.setNet(isSerpulo ? Blocks.coreFoundation : Blocks.coreCitadel, chosenTeam, 0);
                     state.teams.registerCore((CoreBlock.CoreBuild) event.tile.build);
                     if (state.teams.cores(chosenTeam).size == 1){
-                        for(ItemStack stack : PlagueData.survivorLoadout){
+                        for(ItemStack stack : isSerpulo ? PlagueData.survivorLoadoutSerpulo : PlagueData.survivorLoadoutErekir){
                             // Call.transferItemTo(stack.item, stack.amount, event.tile.drawx(), event.tile.drawy(), event.tile);
                             Call.setItem(event.tile.build, stack.item, stack.amount);
                         }
@@ -1201,7 +1203,7 @@ public class PlagueMain extends Plugin {
         world.loadMap(map);
         loadedMap = state.map;
 
-        Tile tile = state.teams.cores(Team.malis).find(build -> build.block == Blocks.coreNucleus).tile;
+        Tile tile = state.teams.cores(Team.malis).find(build -> build.block == Blocks.coreNucleus || build.block == Blocks.coreAcropolis).tile;
 
         // Make cores and power source indestructible
         state.teams.cores(Team.malis).each(coreBuild -> coreBuild.indestructible = true);
@@ -1214,6 +1216,8 @@ public class PlagueMain extends Plugin {
             }
         }
 
+        if(tile.build.block == Blocks.coreAcropolis) isSerpulo = false;
+
         plagueCore[0] = tile.x;
         plagueCore[1] = tile.y;
         world.beginMapLoad();
@@ -1222,8 +1226,7 @@ public class PlagueMain extends Plugin {
 
 
         rules.enemyCoreBuildRadius = 75 * 8;
-        rules.hiddenBuildItems.addAll(Items.erekirItems);
-        rules.hiddenBuildItems.removeAll(Items.serpuloItems);
+        rules.hiddenBuildItems = map.rules().hiddenBuildItems;
         rules.hideBannedBlocks = true;
         state.rules = rules.copy();
 

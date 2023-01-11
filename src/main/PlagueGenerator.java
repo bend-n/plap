@@ -39,7 +39,7 @@ public class PlagueGenerator{
         maps.addDefaultOres(ores);
 
 
-        int i = 0;
+        int i = (int) System.currentTimeMillis();
         for(GenerateFilter o : ores){
             ((OreFilter) o).threshold -= 0.05f;
             o.seed = i++;

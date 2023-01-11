@@ -57,16 +57,17 @@ public class PlagueData {
         itemValues = Collections.unmodifiableMap(aMap);
     }
 
-    public static final Seq<ItemStack> survivorLoadout;
+    public static final Seq<ItemStack> survivorLoadoutSerpulo;
     static {
-        survivorLoadout = ItemStack.list(Items.copper, 3600, Items.lead, 3600,
+        survivorLoadoutSerpulo = ItemStack.list(Items.copper, 3600, Items.lead, 3600,
                 Items.graphite, 1800, Items.titanium, 1800, Items.silicon, 900, Items.metaglass, 900);
     }
 
-    public static final Seq<ItemStack> plagueLoadout;
+    public static final Seq<ItemStack> survivorLoadoutErekir;
     static {
-        plagueLoadout = ItemStack.list(Items.copper, 4000, Items.lead, 4000,
-                Items.graphite, 2000, Items.titanium, 2000, Items.silicon, 1000, Items.metaglass, 1000);
+        survivorLoadoutErekir = ItemStack.list(Items.copper, 3600, Items.lead, 3600,
+                Items.graphite, 1800, Items.titanium, 1800, Items.silicon, 900, Items.metaglass, 900,
+                Items.beryllium, 3600, Items.tungsten, 3600);
     }
 
     public static final ObjectSet<Block> survivorBanned;
