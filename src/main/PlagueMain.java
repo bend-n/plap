@@ -153,7 +153,7 @@ public class PlagueMain extends Plugin {
             if(action.player != null && action.tile != null){
                 if(cartesianDistance(action.tile.x, action.tile.y,
                         plagueCore[0], plagueCore[1]) < world.height()/2.8){
-                    if((action.player.team() != Team.malis && action.block == Blocks.vault)
+                    if((action.player.team() != Team.malis && (action.block == Blocks.vault || action.block == Blocks.reinforcedVault))
                         || action.player.team() == Team.blue) {
                         action.player.sendMessage("[scarlet]Cannot place core/vault that close to plague!");
                         return false;
@@ -497,9 +497,12 @@ public class PlagueMain extends Plugin {
         });
 
         Events.on(EventType.TapEvent.class, event ->{
-            if(event.tile.block() == Blocks.vault && event.tile.team() != Team.malis && event.player.team() == event.tile.team()){
-                if(event.tile.build.items.has(Items.thorium, 997)){
+            if(event.tile.team() != Team.malis && event.player.team() == event.tile.team()){
+                if(event.tile.block() == Blocks.vault && event.tile.build.items.has(Items.thorium, 997)){
                     event.tile.build.tile.setNet(Blocks.coreShard, event.tile.team(), 0);
+                }
+                if(event.tile.block() == Blocks.reinforcedVault && event.tile.build.items.has(Items.thorium, 897)){
+                    event.tile.build.tile.setNet(Blocks.coreBastion, event.tile.team(), 0);
                 }
             }
         });

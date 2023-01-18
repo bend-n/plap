@@ -97,7 +97,7 @@ public class PlagueData {
                 Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.canvas,
                 Blocks.breach, Blocks.diffuse, Blocks.sublimate, Blocks.titan, Blocks.disperse, Blocks.afflict, Blocks.lustre,
                 Blocks.scathe, Blocks.smite, Blocks.malign,
-                Blocks.turbineCondenser, Blocks.chemicalCombustionChamber, Blocks.pyrolysisGenerator, Blocks.fluxReactor,
+                Blocks.turbineCondenser, Blocks.chemicalCombustionChamber, Blocks.fluxReactor,
                 Blocks.neoplasiaReactor); // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
 
