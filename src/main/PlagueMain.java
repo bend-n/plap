@@ -20,6 +20,7 @@ import mindustry.game.*;
 import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.io.SaveIO;
+import mindustry.maps.planet.ErekirPlanetGenerator;
 import mindustry.mod.Plugin;
 import mindustry.net.*;
 import mindustry.net.Net;
@@ -1221,7 +1222,9 @@ public class PlagueMain extends Plugin {
         plagueCore[0] = tile.x;
         plagueCore[1] = tile.y;
         world.beginMapLoad();
-        PlagueGenerator.defaultOres(world.tiles);
+        PlagueGenerator.defaultOres(world.tiles, isSerpulo);
+
+
         world.endMapLoad();
 
 
@@ -1229,7 +1232,6 @@ public class PlagueMain extends Plugin {
         rules.hiddenBuildItems = map.rules().hiddenBuildItems;
         rules.hideBannedBlocks = true;
         state.rules = rules.copy();
-
 
 
 

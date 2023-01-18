@@ -7,10 +7,13 @@ import mindustry.Vars;
 import mindustry.content.*;
 import mindustry.gen.Sounds;
 import mindustry.gen.Unit;
+import mindustry.maps.Maps;
+import mindustry.maps.filters.*;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
 import mindustry.world.Block;
+import mindustry.world.blocks.environment.OreBlock;
 
 import java.util.*;
 
@@ -65,16 +68,16 @@ public class PlagueData {
 
     public static final Seq<ItemStack> survivorLoadoutErekir;
     static {
-        survivorLoadoutErekir = ItemStack.list(Items.copper, 3600, Items.lead, 3600,
-                Items.graphite, 1800, Items.titanium, 1800, Items.silicon, 900, Items.metaglass, 900,
-                Items.beryllium, 3600, Items.tungsten, 3600);
+        survivorLoadoutErekir = ItemStack.list(Items.beryllium, 1000, Items.graphite, 1000,
+                Items.tungsten, 500, Items.thorium, 500);
     }
 
     public static final ObjectSet<Block> survivorBanned;
     static {
         survivorBanned = ObjectSet.with(Blocks.groundFactory, Blocks.navalFactory,
-                Blocks.logicDisplay, Blocks.largeLogicDisplay, // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor,
-                Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor, Blocks.tetrativeReconstructor);
+                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.canvas, // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor,
+                Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor, Blocks.tetrativeReconstructor,
+                Blocks.shipAssembler, Blocks.mechAssembler);
     }
 
     public static final ObjectSet<Block> plagueBanned;
@@ -89,7 +92,79 @@ public class PlagueData {
                 Blocks.surgeWall, Blocks.surgeWallLarge, Blocks.thoriumWall, Blocks.thoriumWallLarge, Blocks.phaseWall,
                 Blocks.phaseWallLarge, Blocks.titaniumWall, Blocks.titaniumWallLarge, Blocks.copperWallLarge,
                 Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
-                Blocks.logicDisplay, Blocks.largeLogicDisplay); // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
+                Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.canvas,
+                Blocks.breach, Blocks.diffuse, Blocks.sublimate, Blocks.titan, Blocks.disperse, Blocks.afflict, Blocks.lustre,
+                Blocks.scathe, Blocks.smite, Blocks.malign); // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
+    }
+
+    public static final ObjectSet<GenerateFilter> erekirFilters;
+    static{
+        final int[] seedOffset = {(int) System.currentTimeMillis()};
+        OreFilter berylliumFloorFilter = new OreFilter() {{
+            ore = Blocks.oreBeryllium;
+            seed = seedOffset[0]++;
+        }};
+
+        OreFilter berylliumWallFilter = new OreFilter() {{
+            ore = Blocks.wallOreBeryllium;
+            seed = seedOffset[0]++;
+            threshold -= 0.1;
+        }};
+
+        OreFilter tungstenFloorFilter = new OreFilter() {{
+            ore = Blocks.oreTungsten;
+            seed = seedOffset[0]++;
+        }};
+        OreFilter tungstenWallFilter = new OreFilter() {{
+            ore = Blocks.wallOreTungsten;
+            seed = seedOffset[0]++;
+            threshold -= 0.1;
+        }};
+
+        OreFilter thoriumFloorFilter = new OreFilter() {{
+            ore = Blocks.oreCrystalThorium;
+            seed = seedOffset[0]++;
+        }};
+        OreFilter thoriumWallFilter = new OreFilter() {{
+            ore = Blocks.wallOreThorium;
+            seed = seedOffset[0]++;
+            threshold -= 0.1;
+        }};
+
+        OreFilter graphiteWallFilter = new OreFilter() {{
+            ore = Blocks.graphiticWall;
+            seed = seedOffset[0]++;
+            threshold -= 0.1;
+        }};
+
+        OreFilter slagOreFilter = new OreFilter() {{
+            ore = Blocks.slag;
+            seed = seedOffset[0] ++;
+            threshold += 0.075;
+        }};
+
+        OreFilter arkyciteOreFilter = new OreFilter() {{
+            ore = Blocks.arkyciteFloor;
+            seed = seedOffset[0] ++;
+            threshold += 0.075;
+        }};
+
+        ScatterFilter ventFilter = new ScatterFilter() {{
+            floor = Blocks.carbonVent;
+            chance = 0.001f;
+        }};
+
+
+
+
+
+        erekirFilters = ObjectSet.with(
+                berylliumFloorFilter, berylliumWallFilter,
+                tungstenFloorFilter, tungstenWallFilter,
+                thoriumFloorFilter, thoriumWallFilter,
+                graphiteWallFilter,
+                slagOreFilter, arkyciteOreFilter,
+                ventFilter);
     }
 
 
