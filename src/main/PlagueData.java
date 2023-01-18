@@ -77,7 +77,9 @@ public class PlagueData {
         survivorBanned = ObjectSet.with(Blocks.groundFactory, Blocks.navalFactory,
                 Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.canvas, // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor,
                 Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor, Blocks.tetrativeReconstructor,
-                Blocks.shipAssembler, Blocks.mechAssembler);
+                Blocks.shipAssembler, Blocks.mechAssembler, Blocks.tankAssembler, Blocks.tankFabricator, Blocks.shipFabricator,
+                Blocks.mechFabricator, Blocks.tankRefabricator, Blocks.mechRefabricator, Blocks.shipRefabricator,
+                Blocks.primeRefabricator);
     }
 
     public static final ObjectSet<Block> plagueBanned;
