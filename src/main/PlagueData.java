@@ -96,7 +96,9 @@ public class PlagueData {
                 Blocks.copperWall, Blocks.door, Blocks.doorLarge, Blocks.plastaniumWall, Blocks.plastaniumWallLarge,
                 Blocks.logicDisplay, Blocks.largeLogicDisplay, Blocks.canvas,
                 Blocks.breach, Blocks.diffuse, Blocks.sublimate, Blocks.titan, Blocks.disperse, Blocks.afflict, Blocks.lustre,
-                Blocks.scathe, Blocks.smite, Blocks.malign); // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
+                Blocks.scathe, Blocks.smite, Blocks.malign,
+                Blocks.turbineCondenser, Blocks.chemicalCombustionChamber, Blocks.pyrolysisGenerator, Blocks.fluxReactor,
+                Blocks.neoplasiaReactor); // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
 
     public static final ObjectSet<GenerateFilter> erekirFilters;
