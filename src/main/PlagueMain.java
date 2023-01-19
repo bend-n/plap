@@ -1220,7 +1220,7 @@ public class PlagueMain extends Plugin {
             }
         }
 
-        if(tile.build.block == Blocks.coreAcropolis) isSerpulo = false;
+        isSerpulo = tile.build.block != Blocks.coreAcropolis;
 
         plagueCore[0] = tile.x;
         plagueCore[1] = tile.y;

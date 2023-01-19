@@ -79,7 +79,7 @@ public class PlagueData {
                 Blocks.multiplicativeReconstructor, Blocks.exponentialReconstructor, Blocks.tetrativeReconstructor,
                 Blocks.shipAssembler, Blocks.mechAssembler, Blocks.tankAssembler, Blocks.tankFabricator, Blocks.shipFabricator,
                 Blocks.mechFabricator, Blocks.tankRefabricator, Blocks.mechRefabricator, Blocks.shipRefabricator,
-                Blocks.primeRefabricator);
+                Blocks.primeRefabricator, Blocks.scathe);
     }
 
     public static final ObjectSet<Block> plagueBanned;
@@ -138,24 +138,24 @@ public class PlagueData {
         OreFilter graphiteWallFilter = new OreFilter() {{
             ore = Blocks.graphiticWall;
             seed = seedOffset[0]++;
-            threshold -= 0.1;
+            threshold -= 0.2;
         }};
 
         OreFilter slagOreFilter = new OreFilter() {{
             ore = Blocks.slag;
             seed = seedOffset[0] ++;
-            threshold += 0.075;
+            threshold += 0.06;
         }};
 
         OreFilter arkyciteOreFilter = new OreFilter() {{
             ore = Blocks.arkyciteFloor;
             seed = seedOffset[0] ++;
-            threshold += 0.075;
+            threshold += 0.06;
         }};
 
         ScatterFilter ventFilter = new ScatterFilter() {{
             floor = Blocks.carbonVent;
-            chance = 0.001f;
+            chance = 0.0015f;
         }};
 
 
