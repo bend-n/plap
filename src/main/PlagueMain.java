@@ -85,7 +85,7 @@ public class PlagueMain extends Plugin {
     private float multiplier;
     private static DecimalFormat df = new DecimalFormat("0.00");
 
-    private int winTime = 45; // In minutes
+    private int winTime = 3; // In minutes
 
     private float realTime = 0f;
     private int seconds;
@@ -167,7 +167,10 @@ public class PlagueMain extends Plugin {
                         && action.player.team() != Team.malis && action.player.team() != Team.blue){
                     return false;
                 }
-                if(action.block != null && PlagueData.plagueBanned.contains(action.block)
+                if(action.block != null &&
+                        ((PlagueData.plagueBanned.contains(action.block) && hasWon)
+                        ||
+                        (PlagueData.plagueBannedPreWin.contains(action.block) && !hasWon))
                         && action.player.team() == Team.malis){
                     return false;
                 }
@@ -241,6 +244,8 @@ public class PlagueMain extends Plugin {
                         int addXp = 1000 * (cPly.donatorLevel*2 + 1);
                         cPly.addXP(addXp, false, "[accent]+[scarlet]" + addXp + "xp[accent] for winning");
                     }
+
+                    updatePlayer(player);
 
                 });
 
@@ -968,9 +973,11 @@ public class PlagueMain extends Plugin {
 
     private void updatePlayer(Player ply){
 
+        Log.info(PlagueData.plagueBanned);
+
         if(ply.team() == Team.malis){
             Rules tempRules = rules.copy();
-            tempRules.bannedBlocks = PlagueData.plagueBanned;
+            tempRules.bannedBlocks = hasWon ? PlagueData.plagueBanned : PlagueData.plagueBannedPreWin;
             for(int i=0; i<5; i++){ // Just making sure the packet gets there
                 Call.setRules(ply.con, tempRules);
             }

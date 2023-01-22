@@ -101,6 +101,12 @@ public class PlagueData {
                 Blocks.neoplasiaReactor); // Blocks.microProcessor, Blocks.logicProcessor, Blocks.hyperProcessor);
     }
 
+    public static final ObjectSet<Block> plagueBannedPreWin;
+    static{
+        plagueBannedPreWin = ObjectSet.with(plagueBanned.toSeq());
+        plagueBannedPreWin.addAll(Blocks.shipFabricator, Blocks.shipRefabricator, Blocks.shipAssembler);
+    }
+
     public static final ObjectSet<GenerateFilter> erekirFilters;
     static{
         final int[] seedOffset = {(int) System.currentTimeMillis()};
