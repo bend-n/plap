@@ -85,7 +85,7 @@ public class PlagueMain extends Plugin {
     private float multiplier;
     private static DecimalFormat df = new DecimalFormat("0.00");
 
-    private int winTime = 3; // In minutes
+    private int winTime = 45; // In minutes
 
     private float realTime = 0f;
     private int seconds;
@@ -795,12 +795,10 @@ public class PlagueMain extends Plugin {
 
         UnitTypes.flare.weapons = new Seq<>();
 
-        UnitTypes.mega.payloadCapacity = 0f;
-        UnitTypes.quad.payloadCapacity = 0f;
-        UnitTypes.oct.payloadCapacity = 0f;
 
         for (UnitType u : Vars.content.units()) {
             u.crashDamageMultiplier = 0f;
+            u.payloadCapacity = 0f;
         }
 
         rules.unitCapVariable = false;
@@ -972,8 +970,6 @@ public class PlagueMain extends Plugin {
     }
 
     private void updatePlayer(Player ply){
-
-        Log.info(PlagueData.plagueBanned);
 
         if(ply.team() == Team.malis){
             Rules tempRules = rules.copy();
