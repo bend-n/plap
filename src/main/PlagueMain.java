@@ -56,7 +56,7 @@ public class PlagueMain extends Plugin {
 
     private int teamsCount;
 
-    private final Rules rules = new Rules();
+    private Rules rules;
 
     private Seq<Weapon> polyWeapons;
     private Seq<Weapon> megaWeapon;
@@ -1159,6 +1159,7 @@ public class PlagueMain extends Plugin {
     }
 
     void initRules() {
+     	rules = new Rules();
         rules.enemyCoreBuildRadius = 75 * 7;
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
