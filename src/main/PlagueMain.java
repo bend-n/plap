@@ -1159,7 +1159,7 @@ public class PlagueMain extends Plugin {
     }
 
     void initRules() {
-     	rules = new Rules();
+        rules = new Rules();
         rules.enemyCoreBuildRadius = 75 * 7;
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
