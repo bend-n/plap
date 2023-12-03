@@ -33,6 +33,8 @@ import mindustry.world.blocks.units.Reconstructor;
 import base.DBInterface;
 import base.CustomPlayer;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.*;
@@ -85,6 +87,9 @@ public class PlagueMain extends Plugin {
     private float realTime = 0f;
     private static long startTime;
     private boolean newRecord;
+
+    private String plagueLb;
+    private String survLb;
 
     private final ArrayList<Integer> rotation = new ArrayList<>();
     private int mapIndex = 0;
@@ -683,6 +688,14 @@ public class PlagueMain extends Plugin {
             player.sendMessage("[accent]Tap the block you want to destroy.");
         });
 
+        handler.<Player>register("lb", "Show the leaderboard", (_args, player) -> {
+            if (player.team() == Team.malis)
+                player.sendMessage(plagueLb);
+            else
+                player.sendMessage(survLb);
+
+        });
+
         handler.<Player>register("multiplier", "The current health multiplier", (_args, player) -> {
             player.sendMessage(String.format("[scarlet]%.1fx [accent]health", multiplier));
         });
@@ -1124,6 +1137,32 @@ public class PlagueMain extends Plugin {
         state.rules.unitDamageMultiplier = 1;
     }
 
+    String leaderboard(boolean plague) {
+        ResultSet rs;
+        if (plague)
+            rs = db.customQuery("select * from mindustry_data order by plagueXp desc limit 5");
+        else
+            rs = db.customQuery("select * from mindustry_data order by survXp desc limit 5");
+        String s = "[accent]Leaderboard:\n";
+        try {
+            int i = 0;
+            while (rs.next()) {
+                i++;
+                String rank;
+                if (plague)
+                    rank = CustomPlayer.plagueRank(rs.getInt("plagueXp")) + "[scarlet] ";
+                else
+                    rank = CustomPlayer.survRank(rs.getInt("survXp")) + "[olive] ";
+                s += "\n[gold]" + i + "[white]: " + rank + rs.getString("latestName") + "[accent]: [gold]"
+                        + rs.getInt("wins") + "[accent] wins";
+            }
+            rs.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return s;
+    }
+
     void infect(CustomPlayer cPly, boolean remove) {
         if (cPly.player.team() != Team.blue && remove) {
             PlagueTeam cTeam = teams.get(cPly.player.team());
@@ -1183,6 +1222,10 @@ public class PlagueMain extends Plugin {
         cPly.connected = true;
         if (player.team() == Team.blue)
             CoreBlock.playerSpawn(Team.malis.cores().random().tile, player);
+        else if (player.team() == Team.malis)
+            player.sendMessage(plagueLb);
+        else
+            player.sendMessage(survLb);
 
         if (cPly.playTime < 60)
             Call.infoMessage(player.con, info);
@@ -1312,6 +1355,9 @@ public class PlagueMain extends Plugin {
         hasWon = false;
 
         resetRules();
+
+        survLb = leaderboard(false);
+        plagueLb = leaderboard(true);
 
         corePlaceInterval.reset();
         tenMinInterval.reset();
