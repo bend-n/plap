@@ -8,10 +8,12 @@ import arc.math.Mathf;
 import arc.struct.*;
 import arc.util.CommandHandler;
 import arc.util.Log;
+import arc.util.Strings;
 import arc.util.Time;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
+import mindustry.content.Planets;
 import mindustry.content.UnitTypes;
 import mindustry.core.GameState;
 import mindustry.core.GameState.State;
@@ -21,7 +23,9 @@ import mindustry.game.Team;
 import mindustry.game.Teams;
 import mindustry.gen.*;
 import mindustry.mod.Plugin;
+import mindustry.type.Item;
 import mindustry.type.ItemStack;
+import mindustry.type.Planet;
 import mindustry.type.UnitType;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.PowerTurret;
@@ -97,7 +101,7 @@ public class PlagueMain extends Plugin {
                 "All-time record: [gold]" + Base.formatTime(mapRecord) + "[accent].\n\nDisable hud with [scarlet]/hud";
     });
 
-    private boolean isSerpulo = true;
+    private Planet planet = Planets.serpulo;
 
     private boolean pregame;
     private boolean gameover;
@@ -115,8 +119,7 @@ public class PlagueMain extends Plugin {
             "The [green]Survivors[accent] build up a huge defense and last 60 minutes to win.\n\n" +
             "To become a " +
             "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
-            "allowed to choose your team. Place any block to place a core at the start of the game.\n\n" +
-            "Air units do no damage before 45 minutes\n\n" + mono_info;
+            "allowed to choose your team. Place any block to place a core at the start of the game.\n\n" + mono_info;
 
     @Override
     public void init() {
@@ -180,7 +183,7 @@ public class PlagueMain extends Plugin {
             if (action.player == null || action.tile == null)
                 return true;
 
-            // mustnt touch power source
+            // mustnt touch power source (this also handles payload for us, nice!)
             if (action.tile.block() == Blocks.powerSource)
                 return false;
 
@@ -189,8 +192,7 @@ public class PlagueMain extends Plugin {
 
             // plague cant build banned blocks
             if (action.player.team() == Team.malis) {
-                if (hasWon ? PlagueData.plagueBanned.contains(action.block)
-                        : PlagueData.plagueBannedPreWin.contains(action.block))
+                if (PlagueData.plagueBanned.contains(action.block))
                     return false;
                 return true; // rest does not concern plague
             }
@@ -342,7 +344,8 @@ public class PlagueMain extends Plugin {
             event.tile.removeNet();
 
             // check if it fits
-            if (!canPlace(isSerpulo ? Blocks.spectre : Blocks.malign, event.tile))
+            if (!canPlace(planet == Planets.serpulo || planet == Planets.sun ? Blocks.spectre : Blocks.malign,
+                    event.tile))
                 return;
 
             Team chosenTeam = null;
@@ -390,17 +393,21 @@ public class PlagueMain extends Plugin {
             base.uuidMapping.get(player.uuid()).team = chosenTeam;
             updatePlayer(player);
 
-            event.tile.setNet(isSerpulo ? Blocks.coreFoundation : Blocks.coreCitadel, chosenTeam, 0);
+            event.tile.setNet(planet != Planets.erekir ? Blocks.coreFoundation : Blocks.coreCitadel, chosenTeam, 0);
             state.teams.registerCore((CoreBlock.CoreBuild) event.tile.build);
             // if just joining the team, only add a little copper+lead.
             // or beryllium+graphite if erekir.
+            // or both if mixtec
             if (state.teams.cores(chosenTeam).size != 1) {
-                event.tile.build.items
-                        .add(isSerpulo ? PlagueData.survivorIncrementSerpulo : PlagueData.survivorIncrementErekir);
+                event.tile.build.items.add(planet == Planets.erekir ? PlagueData.survivorIncrementErekir
+                        : (planet == Planets.serpulo ? PlagueData.survivorIncrementSerpulo
+                                : PlagueData.survivorIncrementMixtech));
                 return;
             }
 
-            for (ItemStack stack : isSerpulo ? PlagueData.survivorLoadoutSerpulo : PlagueData.survivorLoadoutErekir) {
+            for (ItemStack stack : planet == Planets.erekir ? PlagueData.survivorLoadoutErekir
+                    : (planet == Planets.serpulo ? PlagueData.survivorLoadoutSerpulo
+                            : PlagueData.survivorLoadoutMixtech)) {
                 Call.setItem(event.tile.build, stack.item, stack.amount);
             }
         });
@@ -515,7 +522,7 @@ public class PlagueMain extends Plugin {
                 // plague team
                 t == Team.malis
                 // it isnt a vault
-                || event.tile.block() != (isSerpulo ? Blocks.vault : Blocks.reinforcedVault)
+                || event.tile.block() != (planet != Planets.erekir ? Blocks.vault : Blocks.reinforcedVault)
                 // player is tapping other teams vault
                 || event.player.team() != t
             ) return;
@@ -565,6 +572,15 @@ public class PlagueMain extends Plugin {
         });
         // monos must die
         Events.on(EventType.UnitCreateEvent.class, event -> {
+            if (event.unit.type == UnitTypes.collaris || event.unit.type == UnitTypes.disrupt) {
+                if (Base.seconds < (30 * 60)) {
+                    // if a surv sees this, lol.
+                    Call.label(
+                            String.format("⚠ [accent]Infected can't build %s before 30 minutes!",
+                                    event.unit.type.toString()),
+                            5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
+                }
+            } else
             // im pretty sure this actually never happens;
             // there seems to be a upgrade thing, that doesnt let horizons get out at all.
             // ill keep it just in case though, what harm could it cause?
@@ -572,7 +588,7 @@ public class PlagueMain extends Plugin {
                     && event.unit.team != Team.malis) {
                 // let players know they can't build this unit
                 Call.label(
-                        String.format("Survivors can't build %s!",
+                        String.format("⚠ [accent]Survivors can't build %s!",
                                 (event.unit.type == UnitTypes.horizon ? "horizon" : "zenith")),
                         5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
             } else if (event.unit.type == UnitTypes.mono) {
@@ -640,6 +656,14 @@ public class PlagueMain extends Plugin {
             Log.info("game ended.");
             endgame(new Seq<>(), args);
         });
+
+        handler.register("lb", "<inf/sur>", "Leaderboard", arg -> {
+            if (arg[0].equals("inf")) {
+                Log.info(Strings.stripColors(plagueLb));
+            } else {
+                Log.info(Strings.stripColors(survLb));
+            }
+        });
     }
 
     public float snap(float f, float step) {
@@ -671,8 +695,15 @@ public class PlagueMain extends Plugin {
             player.sendMessage("[accent]Tap the block you want to destroy.");
         });
 
-        handler.<Player>register("lb", "Show the leaderboard", (_args, player) -> {
-            if (player.team() == Team.malis)
+        handler.<Player>register("lb", "[team]", "Show the leaderboard", (arg, player) -> {
+            if (arg.length == 1) {
+                if (arg[0].equals("inf")) {
+                    player.sendMessage(plagueLb);
+                } else {
+                    player.sendMessage(survLb);
+
+                }
+            } else if (player.team() == Team.malis)
                 player.sendMessage(plagueLb);
             else
                 player.sendMessage(survLb);
@@ -1062,6 +1093,9 @@ public class PlagueMain extends Plugin {
         rules.buildSpeedMultiplier = 4;
         rules.coreIncinerates = true;
 
+        Seq<Item> mineItems = Seq.with(Items.copper, Items.lead, Items.titanium, Items.thorium, Items.coal, Items.sand,
+                Items.beryllium);
+
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
@@ -1069,10 +1103,12 @@ public class PlagueMain extends Plugin {
         UnitTypes.mega.weapons = new Seq<>();
         UnitTypes.flare.weapons = new Seq<>();
 
-        for (UnitType u : Vars.content.units()) {
+        UnitTypes.mono.mineItems = mineItems;
+        UnitTypes.poly.mineItems = mineItems;
+        UnitTypes.mega.mineItems = mineItems;
+
+        for (UnitType u : Vars.content.units())
             u.crashDamageMultiplier = 0f;
-            u.payloadCapacity = 0f;
-        }
 
         rules.unitCapVariable = false;
         rules.unitCap = 48;
@@ -1083,8 +1119,18 @@ public class PlagueMain extends Plugin {
             originalUnitHealth.put(u, u.health);
         }
 
+        ((CoreBlock) Blocks.coreBastion).incinerateNonBuildable = false;
+        ((CoreBlock) Blocks.coreCitadel).incinerateNonBuildable = false;
+        ((CoreBlock) Blocks.coreAcropolis).incinerateNonBuildable = false;
         ((ItemTurret) Blocks.foreshadow).ammoTypes.get(Items.surgeAlloy).buildingDamageMultiplier = 0;
         ((PowerTurret) Blocks.malign).shootType.buildingDamageMultiplier = 0;
+        ((PowerTurret) Blocks.malign).shootType.fragBullet.buildingDamageMultiplier = 0;
+        ((PowerTurret) Blocks.afflict).shootType.buildingDamageMultiplier = 0;
+        ((PowerTurret) Blocks.afflict).shootType.fragBullet.buildingDamageMultiplier = 0;
+        var bullet = (((ItemTurret) Blocks.scathe).ammoTypes
+                .get(Items.carbide).spawnUnit.weapons.first()).bullet;
+        bullet.buildingDamageMultiplier = 0;
+        bullet.fragBullet.buildingDamageMultiplier = 0;
 
         for (int i = 0; i < maps.customMaps().size; i++) {
             rotation.add(i);
@@ -1095,7 +1141,6 @@ public class PlagueMain extends Plugin {
     void resetRules() {
         UnitTypes.poly.weapons = new Seq<>();
         UnitTypes.mega.weapons = new Seq<>();
-        UnitTypes.quad.weapons = new Seq<>();
 
         for (UnitType u : Vars.content.units()) {
             if (u != UnitTypes.alpha && u != UnitTypes.beta && u != UnitTypes.gamma) {
@@ -1206,7 +1251,7 @@ public class PlagueMain extends Plugin {
 
     private void spawnPlayerUnits(CustomPlayer cPly, Player ply) {
         for (Unit u : cPly.followers) {
-            u.kill();
+            u.dead = true;
             u.health = 0;
         }
         cPly.followers.clear();
@@ -1239,7 +1284,7 @@ public class PlagueMain extends Plugin {
 
     private void updatePlayer(Player ply) {
         if (ply.team() == Team.malis) {
-            updateBanned(ply, hasWon ? PlagueData.plagueBanned : PlagueData.plagueBannedPreWin);
+            updateBanned(ply, PlagueData.plagueBanned);
         } else if (ply.team() != Team.blue) {
             updateBanned(ply, PlagueData.survivorBanned);
         }
@@ -1377,16 +1422,15 @@ public class PlagueMain extends Plugin {
             coreBuild.health(Float.MAX_VALUE);
             coreBuild.items.clear();
         });
-        isSerpulo = PlagueData.serpuloCores.contains(Team.malis.cores().get(0).block);
+        planet = map.rules().planet;
         world.tiles.forEach(t -> {
             if (t.build != null && t.build.block.equals(Blocks.powerSource) && t.build.team() == Team.malis)
                 t.build.health = Float.MAX_VALUE;
         });
         world.beginMapLoad();
-        PlagueGenerator.defaultOres(world.tiles, isSerpulo);
-
         world.endMapLoad();
-        rules.hiddenBuildItems = (isSerpulo ? Items.erekirOnlyItems : PlagueData.serpuloOnlyItems).asSet();
+        rules.hiddenBuildItems = (planet == Planets.erekir ? PlagueData.serpuloOnlyItems
+                : (planet == Planets.serpulo ? Items.erekirOnlyItems : new Seq<Item>())).asSet();
         rules.bannedBlocks = map.rules().bannedBlocks;
         rules.bannedUnits = map.rules().bannedUnits;
         rules.unitWhitelist = map.rules().unitWhitelist;
