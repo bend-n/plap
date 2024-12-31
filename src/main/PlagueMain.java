@@ -1110,6 +1110,13 @@ public class PlagueMain extends Plugin {
         UnitTypes.mega.weapons = new Seq<>();
         UnitTypes.flare.weapons = new Seq<>();
 
+        Seq<Item> mineItems = Seq.with(Items.copper, Items.lead, Items.titanium, Items.thorium, Items.coal, Items.sand,
+                Items.beryllium); 
+
+        UnitTypes.mono.mineItems = mineItems;
+        UnitTypes.poly.mineItems = mineItems;
+        UnitTypes.mega.mineItems = mineItems;
+
         for (UnitType u : Vars.content.units())
             u.crashDamageMultiplier = 0f;
 
