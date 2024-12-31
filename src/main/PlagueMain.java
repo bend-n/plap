@@ -180,15 +180,26 @@ public class PlagueMain extends Plugin {
 
         netServer.admins.addActionFilter((action) -> {
             // dont care
-            if (action.player == null || action.tile == null)
+            if (action.tile == null || action.block == null)
                 return true;
 
             // mustnt touch power source (this also handles payload for us, nice!)
             if (action.tile.block() == Blocks.powerSource)
                 return false;
 
-            if (action.block == null)
+            if (action.player == null) {
+                if (action.unit != null) {
+                    // plague cant build banned blocks
+                    if (action.unit.team() == Team.malis) {
+                        if (PlagueData.plagueBanned.contains(action.block))
+                            return false;
+                    } else if (PlagueData.survivorBanned.contains(action.block)
+                            && action.player.team() != Team.blue) {
+                        return false;
+                    }
+                }
                 return true;
+            }
 
             // plague cant build banned blocks
             if (action.player.team() == Team.malis) {
@@ -430,10 +441,10 @@ public class PlagueMain extends Plugin {
                             if (player.team() == Team.malis) {
                                 var cPly = Base.uuidMapping.get(player.uuid());
                                 if (!hasWon) {
-                                    cPly.addXP(1000,
+                                    cPly.addXP(500,
                                             "[accent]+[scarlet]1000xp[] for infecting survivors [gold]before the win time!");
                                 } else {
-                                    cPly.addXP(500, "[accent]+[scarlet]500xp[] for infecting survivors");
+                                    cPly.addXP(250, "[accent]+[scarlet]500xp[] for infecting survivors");
                                 }
                             }
                         });
@@ -468,7 +479,7 @@ public class PlagueMain extends Plugin {
                         if (player.team() == Team.malis) {
                             var cPly = Base.uuidMapping.get(player.uuid());
                             cPly.addXP(hasWon ? 200 : 600, String.format(
-                                    "[accent]+[scarlet]%dxp[] for killing a core!", hasWon ? 200 : 600), true);
+                                    "[accent]+[scarlet]%dxp[] for killing a core!", hasWon ? 50 : 100), true);
                         }
                     });
                 }
@@ -621,8 +632,7 @@ public class PlagueMain extends Plugin {
         // tried to use if let lol
         if (aTeam != null)
             aTeam.removePlayer(aply);
-        if (!PlagueData.transferUnits.contains(a.unit().type))
-            a.clearUnit();
+        a.unit().kill();
         if (aTeam.players.size() == 0) {
             aTeam.locked = true;
             killTiles(aTeam.team);
@@ -938,7 +948,7 @@ public class PlagueMain extends Plugin {
                             "[gold] - [scarlet]No[accent] malicious cores. Do not place a core inside someone else's base on purpose\n"
                             +
                             "[gold] - [scarlet]Don't[accent] waste resources on useless or unneeded schematics\n" +
-                            "[gold] - [scarlet]Don't[accent] blast/plast/pyra/oil bomb. [gold]Fuse bombing is ok\n");
+                            "[gold] - [gold]Fuse bombing is ok\n");
         });
 
         handler.<Player>register("info", "Display info about the current game", (args, player) -> {
@@ -1093,19 +1103,12 @@ public class PlagueMain extends Plugin {
         rules.buildSpeedMultiplier = 4;
         rules.coreIncinerates = true;
 
-        Seq<Item> mineItems = Seq.with(Items.copper, Items.lead, Items.titanium, Items.thorium, Items.coal, Items.sand,
-                Items.beryllium);
-
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
         UnitTypes.poly.weapons = new Seq<>();
         UnitTypes.mega.weapons = new Seq<>();
         UnitTypes.flare.weapons = new Seq<>();
-
-        UnitTypes.mono.mineItems = mineItems;
-        UnitTypes.poly.mineItems = mineItems;
-        UnitTypes.mega.mineItems = mineItems;
 
         for (UnitType u : Vars.content.units())
             u.crashDamageMultiplier = 0f;
