@@ -1002,7 +1002,7 @@ public class PlagueMain extends Plugin {
                     }
 
                     var teamMate = Base.find(args[0], player);
-                    if (teamMate != null && teamMate.team() != player.team()) {
+                    if (teamMate != null && teamMate.team() == player.team()) {
                         Team teamToSet = pregame ? Team.blue : Team.malis;
                         CustomPlayer target = base.uuidMapping.get(player.uuid());
                         target.team = teamToSet;
