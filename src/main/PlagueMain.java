@@ -180,26 +180,15 @@ public class PlagueMain extends Plugin {
 
         netServer.admins.addActionFilter((action) -> {
             // dont care
-            if (action.tile == null || action.block == null)
+            if (action.player == null || action.tile == null)
                 return true;
 
             // mustnt touch power source (this also handles payload for us, nice!)
             if (action.tile.block() == Blocks.powerSource)
                 return false;
 
-            if (action.player == null) {
-                if (action.unit != null) {
-                    // plague cant build banned blocks
-                    if (action.unit.team() == Team.malis) {
-                        if (PlagueData.plagueBanned.contains(action.block))
-                            return false;
-                    } else if (PlagueData.survivorBanned.contains(action.block)
-                            && action.player.team() != Team.blue) {
-                        return false;
-                    }
-                }
+            if (action.block == null)
                 return true;
-            }
 
             // plague cant build banned blocks
             if (action.player.team() == Team.malis) {
@@ -1111,7 +1100,7 @@ public class PlagueMain extends Plugin {
         UnitTypes.flare.weapons = new Seq<>();
 
         Seq<Item> mineItems = Seq.with(Items.copper, Items.lead, Items.titanium, Items.thorium, Items.coal, Items.sand,
-                Items.beryllium); 
+                Items.beryllium);
 
         UnitTypes.mono.mineItems = mineItems;
         UnitTypes.poly.mineItems = mineItems;
