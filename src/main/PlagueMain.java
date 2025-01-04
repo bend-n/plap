@@ -30,6 +30,7 @@ import mindustry.type.UnitType;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.PowerTurret;
 import mindustry.world.blocks.defense.turrets.Turret.TurretBuild;
+import mindustry.world.blocks.power.ImpactReactor;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
 import base.DBInterface;
@@ -572,25 +573,18 @@ public class PlagueMain extends Plugin {
         });
         // monos must die
         Events.on(EventType.UnitCreateEvent.class, event -> {
+            final Seq<UnitType> survUnits = new Seq<UnitType>(
+                    new UnitType[] { UnitTypes.flare, UnitTypes.poly, UnitTypes.mega });
             if (event.unit.type == UnitTypes.collaris || event.unit.type == UnitTypes.disrupt) {
                 if (Base.seconds < (30 * 60)) {
                     // if a surv sees this, lol.
                     Call.label(
                             String.format("⚠ [accent]Infected can't build %s before 30 minutes!",
-                                    event.unit.type.toString()),
+                                    event.unit.type.emoji()),
                             5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
                 }
-            } else
-            // im pretty sure this actually never happens;
-            // there seems to be a upgrade thing, that doesnt let horizons get out at all.
-            // ill keep it just in case though, what harm could it cause?
-            if ((event.unit.type == UnitTypes.horizon || event.unit.type == UnitTypes.zenith)
-                    && event.unit.team != Team.malis) {
-                // let players know they can't build this unit
-                Call.label(
-                        String.format("⚠ [accent]Survivors can't build %s!",
-                                (event.unit.type == UnitTypes.horizon ? "horizon" : "zenith")),
-                        5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
+                event.unit.health = 0;
+                event.unit.dead = true;
             } else if (event.unit.type == UnitTypes.mono) {
                 PlagueTeam team = teams.get(event.unit.team);
                 if (team == null)
@@ -602,12 +596,19 @@ public class PlagueMain extends Plugin {
                                 "[accent]You have reached the mono cap, feel free to delete the mono factory. See /monos for more information.");
                     });
                 }
-                // dont return: kill the monos even if their death is meaningless
-            } else {
-                return;
+                // kill the monos even if their death is meaningless
+                event.unit.health = 0;
+                event.unit.dead = true;
+            } else if (!survUnits.contains(event.unit.type)
+                    && event.unit.team != Team.malis) {
+                // let players know they can't build this unit
+                Call.label(
+                        String.format("⚠ [accent]Survivors can't build []%s[accent]!",
+                                event.unit.type.emoji()),
+                        5f, event.spawner.tileX() * 8, event.spawner.tileY() * 8);
+                event.unit.health = 0;
+                event.unit.dead = true;
             }
-            event.unit.health = 0;
-            event.unit.dead = true;
         });
     }
 
@@ -1104,18 +1105,16 @@ public class PlagueMain extends Plugin {
                     Items.beryllium);
         }
 
-        for (UnitType u : Vars.content.units())
-            u.crashDamageMultiplier = 0f;
-
         rules.unitCapVariable = false;
-        rules.unitCap = 48;
-        rules.fire = false;
+        rules.unitCap = 64;
         rules.modeName = "Plague";
 
         for (UnitType u : Vars.content.units()) {
             originalUnitHealth.put(u, u.health);
         }
 
+        UnitTypes.omura.hitSize = UnitTypes.sei.hitSize;
+        ((ImpactReactor) Blocks.impactReactor).liquidCapacity = 3000;
         ((CoreBlock) Blocks.coreBastion).incinerateNonBuildable = false;
         ((CoreBlock) Blocks.coreCitadel).incinerateNonBuildable = false;
         ((CoreBlock) Blocks.coreAcropolis).incinerateNonBuildable = false;
