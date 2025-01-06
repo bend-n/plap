@@ -23,6 +23,7 @@ import mindustry.game.Team;
 import mindustry.game.Teams;
 import mindustry.gen.*;
 import mindustry.mod.Plugin;
+import mindustry.net.Administration.Config;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.type.Planet;
@@ -75,7 +76,7 @@ public class PlagueMain extends Plugin {
     private final int pretime = 6;
 
     private final RTInterval corePlaceInterval = new RTInterval(20);
-    private final RTInterval tenMinInterval = new RTInterval(60 * 10);
+    private final RTInterval oneMinInterval = new RTInterval(60);
 
     private float multiplier;
     private static final DecimalFormat df = new DecimalFormat("0.00");
@@ -293,28 +294,46 @@ public class PlagueMain extends Plugin {
                         + " was beaten!");
             }
 
-            if (tenMinInterval.get(base.seconds)) {
-                float multiplyBy = hasWon ? 1.4f : 1.2f;
-                multiplier *= multiplyBy;
-                // state.rules.unitDamageMultiplier = multiplier;
+            if (oneMinInterval.get(Base.seconds)) {
+                var minute = (Base.seconds / 60);
+                if (minute < 60) {
+                    multiplier *= 1.027187f;
+                } else if (minute < 70) {
+                    multiplier *= 1.0717734f;
+                } else if (minute < 120) {
+                    multiplier *= 1.0139595f;
+                } else {
+                    multiplier *= 1.0067806f;
+                }
 
                 for (UnitType u : Vars.content.units()) {
                     if (u != UnitTypes.alpha && u != UnitTypes.beta && u != UnitTypes.gamma) {
                         u.health = originalUnitHealth.get(u) * multiplier;
                     }
                 }
-                String percent = "" + Math.round((multiplyBy - 1) * 100);
-                Call.sendMessage("[accent]Units now have " +
-                        "[scarlet]" + percent + "%[accent] more health " +
-                        "for a total multiplier of [scarlet]" + df.format(multiplier) + "x");
-                if (!justWon) {
-                    Groups.player.each((player) -> {
-                        if (player.team() != Team.malis) {
-                            CustomPlayer cPly = base.uuidMapping.get(player.uuid());
-                            int addXP = Math.min((int) (100.0 * multiplier), 2500);
-                            cPly.addXP(addXP, "[accent]+[scarlet]" + addXP + "xp[] for surviving!");
-                        }
-                    });
+                if (!pregame)
+                    Config.desc.set(String.format("[scarlet]%.1fx[] [#d5ff80]health[]. time: %s", multiplier,
+                            Base.formatTime(Duration.ofSeconds(Base.seconds))));
+
+                if (minute % 10 == 0) {
+                    // state.rules.unitDamageMultiplier = multiplier;
+                    Call.sendMessage("[accent]Units now have more health for a total multiplier of [scarlet]" +
+                            df.format(multiplier) + "×" + "[]. It now takes [scarlet]"
+                            + (int) Math.ceil((UnitTypes.oct.health + 7000)
+                                    / ((ItemTurret) Blocks.foreshadow).ammoTypes.get(Items.surgeAlloy).damage)
+                            + "[] "
+                            + Blocks.foreshadow.emoji()
+                            + " shots to kill an " + UnitTypes.oct.emoji());
+
+                    if (!justWon) {
+                        Groups.player.each((player) -> {
+                            if (player.team() != Team.malis) {
+                                CustomPlayer cPly = Base.uuidMapping.get(player.uuid());
+                                int addXP = Math.min((int) (100.0 * multiplier), 2500);
+                                cPly.addXP(addXP, "[accent]+[scarlet]" + addXP + "xp[] for surviving!");
+                            }
+                        });
+                    }
                 }
             }
 
@@ -1145,6 +1164,7 @@ public class PlagueMain extends Plugin {
         }
 
         state.rules.unitDamageMultiplier = 1;
+        Config.desc.set("game [gold]starting[], get in!");
     }
 
     String leaderboard(boolean plague) {
@@ -1370,7 +1390,7 @@ public class PlagueMain extends Plugin {
         plagueLb = leaderboard(true);
 
         corePlaceInterval.reset();
-        tenMinInterval.reset();
+        oneMinInterval.reset();
 
         // Load new map:
         loadMap(args);
