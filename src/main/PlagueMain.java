@@ -137,16 +137,12 @@ public class PlagueMain extends Plugin {
          * CREATE TABLE `mindustry_data` (
          * `uuid` varchar(40) NOT NULL,
          * `playTime` int DEFAULT '0',
-         * `userID` int DEFAULT NULL,
          * `xp` int DEFAULT '0',
          * `wins` int DEFAULT '0',
+         * `ip` INTEGER UNSIGNED DEFAULT INET_ATON("0.0.0.0"),
          * `latestName` varchar(40) DEFAULT '',
-         * `adminRank` int DEFAULT '0',
          * `hudOn` tinyint(1) DEFAULT '1',
          * PRIMARY KEY (`uuid`),
-         * KEY `userID` (`userID`),
-         * CONSTRAINT `mindustry_data_ibfk_1` FOREIGN KEY (`userID`) REFERENCES `data`
-         * (`userID`) ON UPDATE CASCADE
          * );
          * CREATE TABLE `mindustry_map_data` (
          * `gamemode` varchar(50) NOT NULL,

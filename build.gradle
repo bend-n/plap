@@ -20,7 +20,7 @@ ext{
 dependencies{
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-    implementation "com.github.Apricot-Conservation-Project:base:49b75e3"
+    implementation "com.github.Apricot-Conservation-Project:base:5d34d74"
 }
 
 jar{
