@@ -1108,12 +1108,13 @@ public class PlagueMain extends Plugin {
         rules.buildSpeedMultiplier = 4;
         rules.coreIncinerates = true;
 
-        UnitTypes.alpha.weapons = new Seq<>();
-        UnitTypes.beta.weapons = new Seq<>();
-        UnitTypes.gamma.weapons = new Seq<>();
-        UnitTypes.poly.weapons = new Seq<>();
-        UnitTypes.mega.weapons = new Seq<>();
-        UnitTypes.flare.weapons = new Seq<>();
+        for (int i = 0; i < 100; i++) {
+            if (Team.all[i] != Team.malis) {
+                var r = rules.teams.get(Team.all[i]);
+                r.unitCrashDamageMultiplier = 0;
+                r.unitDamageMultiplier = 0;
+            }
+        }
 
         for (UnitType u : new UnitType[] { UnitTypes.mega, UnitTypes.poly, UnitTypes.pulsar, UnitTypes.quasar }) {
             u.mineItems = Seq.with(Items.copper, Items.lead, Items.titanium, Items.thorium, Items.coal, Items.sand,
