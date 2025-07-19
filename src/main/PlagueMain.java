@@ -1151,9 +1151,10 @@ public class PlagueMain extends Plugin {
     }
 
     void resetRules() {
-        UnitTypes.poly.weapons = new Seq<>();
-        UnitTypes.mega.weapons = new Seq<>();
-
+    	for (UnitType u: new UnitType[] { UnitTypes.flare, UnitTypes.poly, UnitTypes.mega, UnitTypes.gamma, UnitTypes.beta, UnitTypes.alpha }) {
+    	   u.weapons = new Seq<>();	
+    	}
+    	
         for (UnitType u : Vars.content.units()) {
             if (u != UnitTypes.alpha && u != UnitTypes.beta && u != UnitTypes.gamma) {
                 u.health = originalUnitHealth.get(u);
