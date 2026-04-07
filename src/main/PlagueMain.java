@@ -1151,10 +1151,11 @@ public class PlagueMain extends Plugin {
     }
 
     void resetRules() {
-    	for (UnitType u: new UnitType[] { UnitTypes.flare, UnitTypes.poly, UnitTypes.mega, UnitTypes.gamma, UnitTypes.beta, UnitTypes.alpha }) {
-    	   u.weapons = new Seq<>();	
-    	}
-    	
+        for (UnitType u : new UnitType[] { UnitTypes.flare, UnitTypes.poly, UnitTypes.mega, UnitTypes.gamma,
+                UnitTypes.beta, UnitTypes.alpha }) {
+            u.weapons = new Seq<>();
+        }
+
         for (UnitType u : Vars.content.units()) {
             if (u != UnitTypes.alpha && u != UnitTypes.beta && u != UnitTypes.gamma) {
                 u.health = originalUnitHealth.get(u);
@@ -1214,13 +1215,13 @@ public class PlagueMain extends Plugin {
             for (int y = 0; y < world.height(); y++) {
                 Tile tile = world.tile(x, y);
                 if (tile.build != null && tile.team() == team) {
-                    Time.run(Mathf.random(60f * 6), tile.build::kill);
+                    Time.run(Mathf.random(60f * 30), tile.build::kill);
                 }
             }
         }
         for (Unit u : Groups.unit) {
             if (u.team == team) {
-                u.kill();
+                Time.run(Mathf.random(60f * 30), u::kill);
             }
         }
     }
@@ -1272,7 +1273,7 @@ public class PlagueMain extends Plugin {
         if (ply.team() == Team.blue) {
             return;
         }
-        int count = ply.team() == Team.malis ? 1 : 4;
+        int count = ply.team() == Team.malis ? 1 : 8;
         for (int i = 0; i < count; i++) {
             Unit u = UnitTypes.poly.create(ply.team());
             u.set(ply.getX(), ply.getY());
@@ -1280,10 +1281,12 @@ public class PlagueMain extends Plugin {
             cPly.followers.add(u);
         }
         if (ply.team() != Team.malis) {
-            Unit u = UnitTypes.mega.create(ply.team());
-            u.set(ply.getX(), ply.getY());
-            u.add();
-            cPly.followers.add(u);
+            for (int i = 0; i < 2; i++) {
+                Unit u = UnitTypes.mega.create(ply.team());
+                u.set(ply.getX(), ply.getY());
+                u.add();
+                cPly.followers.add(u);
+            }
         }
 
     }
@@ -1443,8 +1446,6 @@ public class PlagueMain extends Plugin {
         });
         world.beginMapLoad();
         world.endMapLoad();
-        rules.hiddenBuildItems = (planet == Planets.erekir ? PlagueData.serpuloOnlyItems
-                : (planet == Planets.serpulo ? Items.erekirOnlyItems : new Seq<Item>())).asSet();
         rules.bannedBlocks = map.rules().bannedBlocks;
         rules.bannedUnits = map.rules().bannedUnits;
         rules.unitWhitelist = map.rules().unitWhitelist;
@@ -1477,7 +1478,7 @@ public class PlagueMain extends Plugin {
         for (Player player : players) {
             Call.worldDataBegin(player.con);
             netServer.sendWorldData(player);
-            base.uuidMapping.get(player.uuid()).reset();
+            Base.uuidMapping.get(player.uuid()).reset();
 
             loadPlayer(player);
         }

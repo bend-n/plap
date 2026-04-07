@@ -2,9 +2,9 @@
 apply plugin: "java"
 
 version '4.10'
-
-sourceCompatibility = JavaVersion.VERSION_17
-
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
 sourceSets.main.java.srcDirs = ["src"]
 
 repositories{
@@ -14,18 +14,18 @@ repositories{
 }
 ext{
     //the build number that this plugin is made for
-    mindustryVersion = 'v146'
+    mindustryVersion = 'v156'
 }
 
 dependencies{
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-    implementation "com.github.Apricot-Conservation-Project:base:5d34d74"
+    implementation "com.github.Apricot-Conservation-Project:base:472d41c"
 }
 
 jar{
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    archiveFileName = "${project.archivesBaseName}.jar"
+    archiveFileName = "plague.jar"
     from{
         configurations.runtimeClasspath.collect{it.isDirectory() ? it : zipTree(it)}
     }
