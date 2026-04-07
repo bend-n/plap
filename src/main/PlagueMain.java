@@ -589,7 +589,8 @@ public class PlagueMain extends Plugin {
         // monos must die
         Events.on(EventType.UnitCreateEvent.class, event -> {
             final Seq<UnitType> survUnits = new Seq<UnitType>(
-                    new UnitType[] { UnitTypes.flare, UnitTypes.poly, UnitTypes.mega });
+                    new UnitType[] { UnitTypes.flare, UnitTypes.poly, UnitTypes.mega, UnitTypes.quasar,
+                            UnitTypes.pulsar });
             if (event.unit.type == UnitTypes.collaris || event.unit.type == UnitTypes.disrupt) {
                 if (Base.seconds < (30 * 60)) {
                     // if a surv sees this, lol.
@@ -611,9 +612,10 @@ public class PlagueMain extends Plugin {
                                 "[accent]You have reached the mono cap, feel free to delete the mono factory. See /monos for more information.");
                     });
                 }
-                // kill the monos even if their death is meaningless
-                event.unit.health = 0;
-                event.unit.dead = true;
+                if (event.unit.team == Team.malis) {
+                    event.unit.health = 0;
+                    event.unit.dead = true;
+                }
             } else if (!survUnits.contains(event.unit.type)
                     && event.unit.team != Team.malis) {
                 // let players know they can't build this unit
@@ -1152,7 +1154,7 @@ public class PlagueMain extends Plugin {
 
     void resetRules() {
         for (UnitType u : new UnitType[] { UnitTypes.flare, UnitTypes.poly, UnitTypes.mega, UnitTypes.gamma,
-                UnitTypes.beta, UnitTypes.alpha }) {
+                UnitTypes.beta, UnitTypes.alpha, UnitTypes.pulsar, UnitTypes.quasar }) {
             u.weapons = new Seq<>();
         }
 
