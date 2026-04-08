@@ -17,6 +17,7 @@ import mindustry.content.Planets;
 import mindustry.content.UnitTypes;
 import mindustry.core.GameState;
 import mindustry.core.GameState.State;
+import mindustry.entities.units.BuildPlan;
 import mindustry.game.EventType;
 import mindustry.game.Rules;
 import mindustry.game.Team;
@@ -123,6 +124,82 @@ public class PlagueMain extends Plugin {
             "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
             "allowed to choose your team. Place any block to place a core at the start of the game.\n\n" + mono_info;
 
+    public boolean createTeam(BuildPlan event, Player player) {
+        var tile = event.tile();
+        // check if it fits
+        if (!canPlace(
+                planet == Planets.serpulo || planet == Planets.sun ? Blocks.spectre : Blocks.malign,
+                tile))
+            return false;
+
+        Team chosenTeam = null;
+        loop: {
+            for (Teams.TeamData t : state.teams.getActive()) {
+                // skip plague
+                if (t.team == Team.malis)
+                    continue;
+
+                for (CoreBlock.CoreBuild core : t.cores) {
+                    // check if we can join a team
+                    if (new Vec2(tile.x, tile.y).dst(new Vec2(core.tile.x, core.tile.y)) > 150)
+                        continue;
+
+                    chosenTeam = t.team;
+                    // TODO: allow joining teams when two teams are very close
+                    if (teams.get(chosenTeam).locked) {
+                        player.sendMessage("[accent]This team is locked, you cannot join it!");
+                        return true;
+                    }
+                    if (teams.get(chosenTeam).blacklistedPlayers.contains(player.uuid())) {
+                        player.sendMessage("[accent]You have been blacklisted from this team!");
+                        return true;
+                    }
+                    break loop;
+                }
+            }
+        }
+        // couldnt find a team, make a new one!
+        if (chosenTeam == null) {
+            teamsCount++;
+            // malis is 6
+            chosenTeam = Team.all[teamsCount + 6];
+            teams.put(chosenTeam, new PlagueTeam(chosenTeam, Base.uuidMapping.get(player.uuid())));
+            Base.historyHandler.addEntry(tile.x, tile.y,
+                    "[green] + [accent]" + player.name
+                            + "[accent]: created a team and built a core");
+        } else {
+            Base.historyHandler.addEntry(tile.x, tile.y,
+                    "[green] + [accent]" + player.name + "[accent]: built a core, joining team #"
+                            + chosenTeam.id);
+        }
+
+        teams.get(chosenTeam).addPlayer(Base.uuidMapping.get(player.uuid()));
+
+        player.team(chosenTeam);
+        Base.uuidMapping.get(player.uuid()).team = chosenTeam;
+        updatePlayer(player);
+
+        tile.setNet(planet != Planets.erekir ? Blocks.coreFoundation : Blocks.coreCitadel,
+                chosenTeam, 0);
+        state.teams.registerCore((CoreBlock.CoreBuild) tile.build);
+        // if just joining the team, only add a little copper+lead.
+        // or beryllium+graphite if erekir.
+        // or both if mixtec
+        if (state.teams.cores(chosenTeam).size != 1) {
+            tile.build.items.add(planet == Planets.erekir ? PlagueData.survivorIncrementErekir
+                    : (planet == Planets.serpulo ? PlagueData.survivorIncrementSerpulo
+                            : PlagueData.survivorIncrementMixtech));
+            return true;
+        }
+
+        for (ItemStack stack : planet == Planets.erekir ? PlagueData.survivorLoadoutErekir
+                : (planet == Planets.serpulo ? PlagueData.survivorLoadoutSerpulo
+                        : PlagueData.survivorLoadoutMixtech)) {
+            Call.setItem(tile.build, stack.item, stack.amount);
+        }
+        return true;
+    }
+
     @Override
     public void init() {
         /*
@@ -218,7 +295,12 @@ public class PlagueMain extends Plugin {
             Team.malis.cores().forEach(c -> {
                 c.health(Float.MAX_VALUE);
             });
-
+            if (counts < pretime) {
+                for (Player player : Team.blue.data().players)
+                    for (var plan : player.previewPlansAssembling())
+                        if (plan.dst(player) < 8 * 20 && !plan.breaking && createTeam(plan, player))
+                            break;
+            }
             // Notification about placing a core, then starting game
             if (counts < pretime && corePlaceInterval.get(base.seconds)) {
                 counts++;
@@ -359,73 +441,6 @@ public class PlagueMain extends Plugin {
 
             event.tile.removeNet();
 
-            // check if it fits
-            if (!canPlace(planet == Planets.serpulo || planet == Planets.sun ? Blocks.spectre : Blocks.malign,
-                    event.tile))
-                return;
-
-            Team chosenTeam = null;
-        // @formatter:off
-            loop: { for (Teams.TeamData t : state.teams.getActive()) {
-                // skip plague
-                if (t.team == Team.malis)
-                    continue;
-
-                for (CoreBlock.CoreBuild core : t.cores) {
-                    // check if we can join a team
-                    if (new Vec2(event.tile.x, event.tile.y).dst(new Vec2(core.tile.x, core.tile.y)) > 150)
-                        continue;
-
-                    chosenTeam = t.team;
-                    // TODO: allow joining teams when two tea ms are very close
-                    if (teams.get(chosenTeam).locked) {
-                        player.sendMessage("[accent]This team is locked, you cannot join it!");
-                        return;
-                    }
-                    if (teams.get(chosenTeam).blacklistedPlayers.contains(player.uuid())) {
-                        player.sendMessage("[accent]You have been blacklisted from this team!");
-                        return;
-                    }
-                    break loop;
-                }
-            }}
-            // @formatter:on
-            // couldnt find a team, make a new one!
-            if (chosenTeam == null) {
-                teamsCount++;
-                // i have no idea why its + 6!
-                chosenTeam = Team.all[teamsCount + 6];
-                teams.put(chosenTeam, new PlagueTeam(chosenTeam, base.uuidMapping.get(player.uuid())));
-                base.historyHandler.addEntry(event.tile.x, event.tile.y,
-                        "[green] + [accent]" + player.name + "[accent]: created a team and built a core");
-            } else {
-                base.historyHandler.addEntry(event.tile.x, event.tile.y,
-                        "[green] + [accent]" + player.name + "[accent]: built a core, joining team #" + chosenTeam.id);
-            }
-
-            teams.get(chosenTeam).addPlayer(base.uuidMapping.get(player.uuid()));
-
-            player.team(chosenTeam);
-            base.uuidMapping.get(player.uuid()).team = chosenTeam;
-            updatePlayer(player);
-
-            event.tile.setNet(planet != Planets.erekir ? Blocks.coreFoundation : Blocks.coreCitadel, chosenTeam, 0);
-            state.teams.registerCore((CoreBlock.CoreBuild) event.tile.build);
-            // if just joining the team, only add a little copper+lead.
-            // or beryllium+graphite if erekir.
-            // or both if mixtec
-            if (state.teams.cores(chosenTeam).size != 1) {
-                event.tile.build.items.add(planet == Planets.erekir ? PlagueData.survivorIncrementErekir
-                        : (planet == Planets.serpulo ? PlagueData.survivorIncrementSerpulo
-                                : PlagueData.survivorIncrementMixtech));
-                return;
-            }
-
-            for (ItemStack stack : planet == Planets.erekir ? PlagueData.survivorLoadoutErekir
-                    : (planet == Planets.serpulo ? PlagueData.survivorLoadoutSerpulo
-                            : PlagueData.survivorLoadoutMixtech)) {
-                Call.setItem(event.tile.build, stack.item, stack.amount);
-            }
         });
 
         Events.on(EventType.BlockDestroyEvent.class, event -> {
@@ -1104,7 +1119,9 @@ public class PlagueMain extends Plugin {
 
     void initRules() {
         rules = new Rules();
-        rules.enemyCoreBuildRadius = 75 * 8;
+        rules.enemyCoreBuildRadius = 60 * 8;
+        Team.malis.rules().extraCoreBuildRadius = 20;
+
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
         rules.buildSpeedMultiplier = 4;
