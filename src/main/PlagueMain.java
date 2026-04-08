@@ -1119,8 +1119,8 @@ public class PlagueMain extends Plugin {
 
     void initRules() {
         rules = new Rules();
-        rules.enemyCoreBuildRadius = 60 * 8;
-        Team.malis.rules().extraCoreBuildRadius = 20;
+        rules.enemyCoreBuildRadius = 50 * 8;
+        Team.malis.rules().extraCoreBuildRadius = 40;
 
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
