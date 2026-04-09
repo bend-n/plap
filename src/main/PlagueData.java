@@ -58,7 +58,7 @@ public class PlagueData {
         plagueBanned.addAll(
                 Blocks.berylliumWall, Blocks.berylliumWallLarge, Blocks.tungstenWall, Blocks.tungstenWallLarge,
                 Blocks.blastDoor, Blocks.reinforcedSurgeWall, Blocks.reinforcedSurgeWallLarge, Blocks.carbideWall,
-                Blocks.carbideWallLarge, Blocks.shieldedWall);
+                Blocks.carbideWallLarge, Blocks.shieldedWall, Blocks.scrapWall, Blocks.scrapWallLarge, Blocks.scrapWallHuge, Blocks.scrapWallGigantic);
         plagueBanned.addAll(
                 Blocks.combustionGenerator, Blocks.thermalGenerator,
                 Blocks.steamGenerator, Blocks.differentialGenerator, Blocks.rtgGenerator, Blocks.solarPanel,
