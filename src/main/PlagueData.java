@@ -37,7 +37,7 @@ public class PlagueData {
     public static final ObjectSet<Block> erekirBlockSet = ObjectSet.with(Blocks.duct,
             Blocks.ductBridge, Blocks.ductRouter, Blocks.ductUnloader, Blocks.armoredDuct);
 
-    public static final ObjectSet<Block> survivorBanned = ObjectSet.with(Blocks.groundFactory, Blocks.navalFactory,
+    public static final ObjectSet<Block> survivorBanned = ObjectSet.with(Blocks.navalFactory,
             Blocks.exponentialReconstructor, Blocks.tetrativeReconstructor,
             Blocks.shipAssembler, Blocks.mechAssembler, Blocks.tankAssembler, Blocks.tankFabricator,
             Blocks.shipFabricator,
