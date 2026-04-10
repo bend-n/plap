@@ -296,10 +296,12 @@ public class PlagueMain extends Plugin {
                 c.health(Float.MAX_VALUE);
             });
             if (counts < pretime) {
-                for (Player player : Team.blue.data().players)
+                for (Player player : Team.blue.data().players) {
+                    player.receivingNewPlanGroup = true;
                     for (var plan : player.previewPlansAssembling())
                         if (plan.dst(player) < 8 * 20 && !plan.breaking && createTeam(plan, player))
                             break;
+                }
             }
             // Notification about placing a core, then starting game
             if (counts < pretime && corePlaceInterval.get(base.seconds)) {
