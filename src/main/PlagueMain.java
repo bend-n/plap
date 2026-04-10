@@ -24,6 +24,8 @@ import mindustry.game.Team;
 import mindustry.game.Teams;
 import mindustry.gen.*;
 import mindustry.mod.Plugin;
+import mindustry.net.Administration.ActionFilter;
+import mindustry.net.Administration.ActionType;
 import mindustry.net.Administration.Config;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
@@ -122,10 +124,10 @@ public class PlagueMain extends Plugin {
             "The [green]Survivors[accent] build up a huge defense and last 60 minutes to win.\n\n" +
             "To become a " +
             "[green]Survivor[accent], you must place a core in the first 2 minutes of the game, where you are " +
-            "allowed to choose your team. Place any block to place a core at the start of the game.\n\n" + mono_info;
+            "allowed to choose your team. Ping a nearby location to place a core at the start of the game.\n\n"
+            + mono_info;
 
-    public boolean createTeam(BuildPlan event, Player player) {
-        var tile = event.tile();
+    public boolean createTeam(Tile tile, Player player) {
         // check if it fits
         if (!canPlace(
                 planet == Planets.serpulo || planet == Planets.sun ? Blocks.spectre : Blocks.malign,
@@ -280,7 +282,15 @@ public class PlagueMain extends Plugin {
             }
             return true;
         });
-
+        netServer.admins.addActionFilter((a) -> {
+            return !(a.type == ActionType.pingLocation
+                    && a.player.team() == Team.blue
+                    && counts < pretime
+                    && a.player.dst(a.pingX, a.pingY) < 8 * 30
+                    && createTeam(
+                            Vars.world.tileWorld(a.pingX, a.pingY),
+                            a.player));
+        });
         Events.run(EventType.Trigger.update, () -> {
             if (resetting || firstRun)
                 return;
@@ -299,7 +309,12 @@ public class PlagueMain extends Plugin {
                 for (Player player : Team.blue.data().players) {
                     player.receivingNewPlanGroup = true;
                     for (var plan : player.previewPlansAssembling())
-                        if (plan.dst(player) < 8 * 20 && !plan.breaking && createTeam(plan, player))
+                        if (plan.dst(player) < 8 * 20 && !plan.breaking && createTeam(plan.tile(),
+                                player))
+                            break;
+                    for (var plan : player.previewPlansCurrent())
+                        if (plan.dst(player) < 8 * 20 && !plan.breaking && createTeam(plan.tile(),
+                                player))
                             break;
                 }
             }
@@ -329,7 +344,7 @@ public class PlagueMain extends Plugin {
                     for (Player ply : Groups.player) {
                         if (ply.team() == Team.blue) {
                             ply.sendMessage("[accent]You have [scarlet]" + (pretime * 20 - counts * 20) +
-                                    " [accent]seconds left to place a core. Place any block to place a core.");
+                                    " [accent]seconds left to place a core. Ping a location to core.");
                         }
                     }
                 }
