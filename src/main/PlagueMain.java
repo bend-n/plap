@@ -640,11 +640,13 @@ public class PlagueMain extends Plugin {
                 if (team.monos == MONO_LIMIT && !team.reached_cap) {
                     team.reached_cap = true;
                     team.players.forEach((p) -> {
-                        p.player.sendMessage(
-                                "[accent]You have reached the mono cap, feel free to delete the mono factory. See /monos for more information.");
+                        if (event.unit.team == Team.malis) {
+                            p.player.sendMessage(
+                                    "[accent]You have reached the mono cap, feel free to delete the mono factory. See /monos for more information.");
+                        }
                     });
                 }
-                if (event.unit.team == Team.malis) {
+                if (event.unit.team != Team.malis && !team.reached_cap) {
                     event.unit.health = 0;
                     event.unit.dead = true;
                 }
