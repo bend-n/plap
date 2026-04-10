@@ -1487,6 +1487,7 @@ public class PlagueMain extends Plugin {
         });
         world.beginMapLoad();
         world.endMapLoad();
+        rules.planet = planet;
         rules.bannedBlocks = map.rules().bannedBlocks;
         rules.bannedUnits = map.rules().bannedUnits;
         rules.unitWhitelist = map.rules().unitWhitelist;
