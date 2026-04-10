@@ -648,7 +648,8 @@ public class PlagueMain extends Plugin {
                         }
                     });
                 }
-                if (event.unit.team != INFECTED && !team.reached_cap) {
+
+                if (event.unit.team == INFECTED || !team.reached_cap) {
                     event.unit.health = 0;
                     event.unit.dead = true;
                 }
