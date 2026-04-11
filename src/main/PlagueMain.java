@@ -289,6 +289,7 @@ public class PlagueMain extends Plugin {
                     && a.player.team() == PIONEER
                     && counts < pretime
                     && a.player.dst(a.pingX, a.pingY) < 8 * 30
+                    && !Vars.state.teams.anyEnemyCoresWithinBuildRadius(Team.blue, a.pingX, a.pingY)
                     && createTeam(
                             Vars.world.tileWorld(a.pingX, a.pingY),
                             a.player));
@@ -1141,8 +1142,8 @@ public class PlagueMain extends Plugin {
 
     void initRules() {
         rules = new Rules();
-        rules.enemyCoreBuildRadius = 50 * 8;
-        rules.teams.get(INFECTED).extraCoreBuildRadius = 40;
+        rules.enemyCoreBuildRadius = 40 * 8;
+        rules.teams.get(INFECTED).extraCoreBuildRadius = 40 * 8;
 
         rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
