@@ -1162,6 +1162,9 @@ public class PlagueMain extends Plugin {
             u.mineItems = Seq.with(Items.copper, Items.lead, Items.titanium, Items.thorium, Items.coal, Items.sand,
                     Items.beryllium);
         }
+        for (Item i : Vars.content.items()) {
+            i.explosiveness /= 8;
+        }
 
         rules.unitCapVariable = false;
         rules.unitCap = 64;
