@@ -1490,17 +1490,22 @@ public class PlagueMain extends Plugin {
             if (t.build != null && t.build.block.equals(Blocks.powerSource) && t.build.team() == INFECTED)
                 t.build.health = Float.MAX_VALUE;
         });
+        var r = rules.copy();
         world.beginMapLoad();
         world.endMapLoad();
-        rules.planet = planet;
-        rules.bannedBlocks = map.rules().bannedBlocks;
-        rules.bannedUnits = map.rules().bannedUnits;
-        rules.unitWhitelist = map.rules().unitWhitelist;
-        rules.weather = map.rules().weather;
-        rules.lighting = map.rules().lighting;
-        rules.ambientLight = map.rules().ambientLight;
-        rules.hideBannedBlocks = true;
-        state.rules = rules.copy();
+        if (map.plainName() == "Land Locked") {
+            r.unitCapVariable = false;
+            r.unitCap = 16;
+        }
+        r.planet = planet;
+        r.bannedBlocks = map.rules().bannedBlocks;
+        r.bannedUnits = map.rules().bannedUnits;
+        r.unitWhitelist = map.rules().unitWhitelist;
+        r.weather = map.rules().weather;
+        r.lighting = map.rules().lighting;
+        r.ambientLight = map.rules().ambientLight;
+        r.hideBannedBlocks = true;
+        state.rules = r;
 
         if (firstRun) {
             Log.info("Server not up, starting server...");
