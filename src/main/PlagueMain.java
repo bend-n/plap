@@ -1184,10 +1184,11 @@ public class PlagueMain extends Plugin {
         ((PowerTurret) Blocks.malign).shootType.fragBullet.buildingDamageMultiplier = 0;
         ((PowerTurret) Blocks.afflict).shootType.buildingDamageMultiplier = 0;
         ((PowerTurret) Blocks.afflict).shootType.fragBullet.buildingDamageMultiplier = 0;
-        var bullet = (((ItemTurret) Blocks.scathe).ammoTypes
-                .get(Items.carbide).spawnUnit.weapons.first()).bullet;
-        bullet.buildingDamageMultiplier = 0;
-        bullet.fragBullet.buildingDamageMultiplier = 0;
+        for (var bullet : (((ItemTurret) Blocks.scathe).ammoTypes.values())) {
+            var bullet2 = bullet.spawnUnit.weapons.first().bullet;
+            bullet2.buildingDamageMultiplier = 0;
+            bullet2.fragBullet.buildingDamageMultiplier = 0;
+        }
 
         for (int i = 0; i < maps.customMaps().size; i++) {
             rotation.add(i);
